@@ -1,0 +1,103 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Applicant Profile (John L. Doe)</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+    <!-- Header and Link -->
+        <div class="header-group">
+        <h1 class="page-title">Badge Request History</h1>
+        <h4>Applicant: <a id="applicant-link" href="{% url 'applicant_view' applicant_id %}">{{ applicant }}</a></h4>
+        <hr class="header-line">
+    </div>
+
+    <table id="request-history" cellspacing="0" width="100%" >
+            <thead>
+                <tr>
+                    <th>Requested On</th>
+                    <th>Processed By</th>
+                    <th>Badge Type</th>
+                    <th>Result</th>
+                    <th>No Fly</th>
+                    <th>Adjudication</th>
+                    <th>Issuance Limit</th>
+                </tr>
+            </thead>
+        </table>
+
+    <!-- Link Back To Profile -->
+        <div class="row" style=" margin-top: 65px">
+            <span class="right" style="margin-right: 42px">
+               <a id="issued-link" class="btn btn-primary btn-lg" href="{% url 'applicant_view' applicant_id %}" >Return to Profile</a>
+            </span>
+        </div>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            var requests_data = JSON.parse('{{ requests | safe | escapejs }}').data;
+            console.log(requests_data);
+            $(this).attr("title", "Badge Request History: {{ applicant }}");
+             $('#request-history').DataTable({
+                "bSort": false,
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": requests_data,
+                "responsive": true,
+                "language": {
+                    "emptyTable": "No requests found."
+                },
+                "columns": [
+                    { "data" : "timestamp" },
+                    { "data" : "operatorUsername"},
+                    { "data": "badgeType"},
+                    { "data": function(data) {
+                            if (data.status.nofly && data.status.adjudication && data.status.issuance_count < 4) {
+                                if (data.status.issued)
+                                    return "Issued";
+                                return "Canceled";
+                            }
+                            else {
+                                if (data.status.issued)
+                                    return "Issued";
+                                return "Denied";
+                            }
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.status.nofly)
+                            return "<span class='label label-success'>PASS</span>";
+                        else
+                            return "<span class='label label-danger'>FAIL</span>";
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.status.adjudication)
+                            return "<span class='label label-success'>PASS</span>";
+                        else
+                            return "<span class='label label-danger'>FAIL</span>";
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.status.issuance_count < 4)
+                            return "<span class='label label-success'>PASS</span>";
+                        else
+                            return "<span class='label label-danger'>FAIL</span>";
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+{% endblock %}

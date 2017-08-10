@@ -1,0 +1,72 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Escort Search Results</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Escorts matching the name: <span id="escort-name"></span></h1>
+        <hr class="header-line">
+    </div>
+    <table id="escorts" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>UPID</th>
+                <th>Proximity ID</th>
+                <th>CSN</th>
+                <th>Badge Status</th>
+                <th>Escort Privilege</th>
+            </tr>
+        </thead>
+    </table>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+        escortsData = JSON.parse('{{ escorts | safe | escapejs }}').data;
+        if (escortsData[0].middle_name == null)
+            $('#escort-name').text(escortsData[0].first_name + " " + escortsData[0].last_name);
+        else
+            $('#escort-name').text(escortsData[0].first_name + " " + escortsData[0].middle_name + " " + escortsData[0].last_name);
+        $('#escorts').DataTable({
+            "bSort": false,
+            "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+            "data": escortsData,
+            "responsive": true,
+            "columns": [
+                { "data": function(data) {
+                    if (data.middleName == null)
+                            data.middleName = "";
+                    url = "{% url 'badge_csn_escort_view' 'escortCSN' %}".replace('escortCSN', data.csn);
+                    return "<a href=" + url + ">" + data.first_name + " " + data.middleName + " " + data.last_name + "</a>";
+                    }
+                },
+                { "data": "upid" },
+                { "data": "prox_id"},
+                { "data": "csn"},
+                { "data": "escort_status"},
+                { "data": function(data) {
+                        if (data.escort_privilege)
+                            return "<span style='color:#39B54A;'>Yes</span>";
+                        else
+                            return "<span style='color:indianred;'>No</span>";
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Search by Applicant </title>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/js/validator.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+     <div class="vertical-center">
+        <h1 class="center" style="margin-bottom:0">Search By Person</h1>
+        <br>
+        <form id="search-form" action="{% url 'applicant_results' %}" method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row button-height">
+                <div class="form-group center">
+                        <button id="applicant-btn" class="btn btn-primary active tab-button-left" style="font-size:1.4em">Applicant</button><button id="escort-btn" class="btn btn-primary tab-button-right" style="font-size:1.4em">Escort</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class=form-group>
+                    <label for="first-name" class="col-md-1 col-md-offset-3 control-label required">First Name:</label>
+                    <div class="col-md-4">
+                        <input id="first-name" type="text" class="form-control"
+                               name="first_name" placeholder="Enter a first name..."
+                               pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                               title="Please enter an alphabetical first name with no special characters." required/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class=form-group>
+                <label for="middle-name" class="col-md-1 col-md-offset-3 control-label">Middle Name:</label>
+                    <div class="col-md-4">
+                    <input id="middle-name" type="text" class="form-control"
+                           name="middle_name" placeholder="Enter a middle name..."
+                           pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                           title="Please enter an alphabetical middle name with no special characters." />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class=form-group>
+                <label for="last-name" class="col-md-1 col-md-offset-3 control-label required">Last Name:</label>
+                    <div class="col-md-4">
+                    <input id="last-name" type="text" class="form-control"
+                           name="last_name" placeholder="Enter a last name..."
+                           pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                           title="Please enter an alphabetical last name with no special characters." required/>
+                    </div>
+                </div>
+            </div>
+            <input id="search-type" type="hidden" name="search_type" value="applicant" required/>
+            <div class="row">
+                <div class="form-group center button-height">
+                   <button type="submit" id="submit-btn" class="btn btn-primary btn-lg" style="font-size:1.4em">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            $('#search-list').addClass("active");
+            $('#container').css("margin", 0);
+
+            // Set Default Behavior And Views
+            var activeFontWeight = 600;
+            var defaultFontWeight = 300;
+            var $firstName = $('#first-name');
+            var $middleName = $('#middle-name');
+            var $lastName = $('#last-name');
+            var $searchForm = $('#search-form');
+            var $applicantBtn = $('#applicant-btn');
+            var $escortBtn = $('#escort-btn');
+            var $searchType = $('#search-type');
+
+            $firstName.focus();
+            $applicantBtn.css("font-weight", activeFontWeight);
+
+            $firstName.on("blur", function() {
+                $(this).val($(this).val().trim());
+            });
+            $middleName.on("blur", function() {
+                $(this).val($(this).val().trim());
+            });
+            $lastName.on("blur", function() {
+                $(this).val($(this).val().trim());
+            });
+
+            $applicantBtn.on("click", function(e) {
+                e.preventDefault();
+                $('#search-form').attr('action', '{% url 'applicant_results' %}');
+                if (!$applicantBtn.hasClass("active")) {
+                    $applicantBtn.toggleClass("active")
+                            .css("font-weight", activeFontWeight);
+                    $escortBtn.toggleClass("active")
+                            .css("font-weight", defaultFontWeight);
+                }
+                $searchType.val("applicant");
+                $firstName.focus();
+            });
+            $escortBtn.on("click", function(e) {
+                e.preventDefault();
+                $('#search-form').attr('action', '{% url 'badge_escort_results' %}?type=name');
+                if (!$escortBtn.hasClass("active")) {
+                    $applicantBtn.toggleClass("active")
+                            .css("font-weight", defaultFontWeight);
+                    $escortBtn.toggleClass("active")
+                            .css("font-weight", activeFontWeight);
+                }
+                $searchType.val("escort");
+                $firstName.focus();
+            });
+            $searchForm.validate();
+            $searchForm.on("keypress", function(e) {
+                if (e.which == 13) {
+                       $searchForm.submit();
+                       return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Badge — </title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'tbadge_portal/confirm/css/jquery-confirm.css' %}">
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/confirm/js/jquery-confirm.js' %}"></script>
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Badge CSN: <span id="badge-title-csn"></span></h1>
+        <h4>Badge Type: <span id="badge-type"></span></h4>
+        <h4>Badge Status: <span id="badge-status"></span></h4>
+        <hr class="header-line">
+    </div>
+
+
+    <form id="view-form" role="form" class="form-horizontal" action="" method="get" autocomplete="off">
+
+        <div class=form-group>
+            <label for="temp-csn" class="col-md-2 col-md-offset-2 control-label">Card Serial Number (CSN)</label>
+            <div class="col-md-4">
+                <input type="text" class="form-control center" id="temp-csn" name="prox_id" disabled>
+            </div>
+        </div>
+
+        <div id="escort-field" class=form-group>
+            <label for="escort-csn" class="col-md-2 col-md-offset-2 control-label">Escort Card Serial Number (CSN)</label>
+            <div class="col-md-4">
+                <input type="text" class="form-control center" id="escort-csn" name="escort_prox_id" disabled>
+            </div>
+        </div>
+
+        <div class=form-group>
+            <label for="issued-to" class="col-md-2 col-md-offset-2 control-label">Issued To</label>
+            <div class="col-md-4" id="issued-to-field">
+                <input type="text" class="form-control center form-link" id="issued-to" name="issued" disabled>
+            </div>
+        </div>
+
+        <div id="escort-by-field" class=form-group>
+            <label for="escorted-by" class="col-md-2 col-md-offset-2 control-label">Escorted By</label>
+            <div class="col-md-4" id="escorted-by-field-link">
+                <input type="text" class="form-control center form-link" id="escorted-by" name="escorted_by" disabled>
+            </div>
+        </div>
+
+        <div class=form-group>
+            <label for="issuer" class="col-md-2 col-md-offset-2 control-label">Issuer</label>
+            <div class="col-md-4">
+                 <input type="text" class="form-control center" id="issuer" name="issuer" disabled>
+            </div>
+        </div>
+
+        <div class=form-group>
+            <label for="issue-date" class="col-md-2 col-md-offset-2 control-label">Issue Date</label>
+            <div class="col-md-4">
+                 <input type="text" class="form-control center" id="issue-date" name="issue_date" disabled>
+            </div>
+        </div>
+
+        <div class=form-group>
+            <label for="issue-date" class="col-md-2 col-md-offset-2 control-label">Due Date</label>
+            <div class="col-md-4">
+                 <input type="text" class="form-control center" id="due-date" name="due_date" disabled>
+            </div>
+        </div>
+
+
+        {% if readonly %}
+            <div class="col-md-4 col-md-offset-4 right-justified">
+                <span class="label-spacing">
+                     <a class="btn btn-primary btn-lg" style="font-weight:300" href="{% url 'login' %} ">Home</a>
+                 </span>
+                 <span class="label-spacing">
+                     <a class="btn btn-primary btn-lg" style="font-weight:300" href="{% url 'badge_lookup' %}?type=id ">Return to Lookup</a>
+                 </span>
+                 <span class="label-spacing">
+                     <a class="btn  btn-primary btn-lg" style="font-weight:300" href="{% url 'badge_history' badge_id %}">View Badge History</a>
+                 </span>
+            </div>
+        {% else %}
+            <div class="col-md-4 col-md-offset-4 right-justified">
+                 <span class="label-spacing">
+                     <a class="btn btn-primary btn-lg" style="font-weight:300" href="{% url 'login' %} ">Home</a>
+                 </span>
+                 <span class="label-spacing">
+                     <a class="btn  btn-primary btn-lg" style="font-weight:300" href="{% url 'badge_history' badge_id %}">View Badge History</a>
+                 </span>
+                 <a id="badge-return-btn" class="btn btn-danger btn-lg btn-pop" >Return Badge</a>
+            </div>
+        {% endif %}
+
+    </form>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+        var badgeData = JSON.parse('{{ badge_data | safe | escapejs }}');
+        $('#badge-title-csn').text(badgeData.csn);
+        $('#badge-type').text(badgeData.badge_type);
+        if (badgeData.badge_type == "Standard") {
+            $('#escort-field').css("display", "none");
+            $('#escort-by-field').css("display", "none");
+        }
+        $(this).attr("title", "Badge - " + badgeData.csn);
+        $badge_status = $('#badge-status');
+        if (badgeData.badge_status.status_id == 1) {
+            if (moment() > moment(badgeData.due_on, "MM/DD/YYYY hh:mm a"))
+                $badge_status.text("Overdue").css("color", "indianred").css("font-weight", "bold");
+            else
+                $badge_status.text("Issued");
+        }
+        else $badge_status.text("Returned");
+
+        $('#temp-csn').val(badgeData.csn);
+        $('#escort-csn').val(badgeData.escort_csn);
+        if (badgeData.issuedTo.middle_name != null)
+            $('#issued-to').val(badgeData.issuedTo.first_name + " " + badgeData.issuedTo.middle_name + " " + badgeData.issuedTo.last_name);
+        else
+            $('#issued-to').val(badgeData.issuedTo.first_name + " " + badgeData.issuedTo.last_name);
+            $('#issued-to-field').on("click", function() {
+               window.location.href = "{% url 'applicant_view' 'appIDPlaceholder' %}".replace("appIDPlaceholder", intToHashid(badgeData.issuedTo.applicant_id));
+            });
+        if (badgeData.escort == null) {
+            $('#escorted-by').val("(Not on File)")
+                             .removeClass("form-link");
+        }
+        else {
+            if (badgeData.escort.middle_name != null)
+                $('#escorted-by').val(badgeData.escort.first_name + " " + badgeData.escort.middle_name + " " + badgeData.escort.last_name);
+            else
+                $('#escorted-by').val(badgeData.escort.first_name + " " + badgeData.escort.last_name);
+
+            {% if request.session.role == 'Admin' %}
+                $('#escorted-by-field-link').on("click", function() {
+                    window.location.href = "{% url 'badge_escort_csn_to_upid' %}?csn=" + badgeData.escort_csn;
+                });
+            {% else %}
+                $('#escorted-by').removeClass("form-link");
+            {% endif %}
+        }
+        $('#issuer').val(badgeData.issued_by);
+        $('#issue-date').val(badgeData.issued_on);
+        $('#due-date').val(badgeData.due_on);
+        $('#badge-return-btn').on("click", function(e) {
+            e.preventDefault();
+            $.confirm({
+                theme: "black",
+                title: "Confirm Return",
+                closeIcon: false,
+                backgroundDismiss: true,
+                content: "<p>Are you sure you want to return this badge? This action cannot be undone.</p>",
+                confirmButton: "Return",
+                cancelButton: "Cancel",
+                confirmButtonClass:"btn-primary",
+                cancelButtonClass:"btn-danger",
+                keyboardEnabled: true,
+                confirm: function() {
+                    window.location.href = "{% url 'badge_view' 'badgeIDPlaceholder' %}?action=return".replace("badgeIDPlaceholder", badgeData.csn);
+                }
+            });
+        });
+    });
+    </script>
+{% endblock %}

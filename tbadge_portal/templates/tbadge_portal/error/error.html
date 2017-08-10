@@ -1,0 +1,40 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>TABS - Error</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/login.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block container %}
+    <div class="vertical-center">
+        <img src="{% static 'tbadge_portal/img/sfo_logo.png' %}" width="150px" class="img-center"/>
+        <h1 class="white center">TEMPORARY ACCESS</h1>
+        <h2 class="center" style="color:#64B5F6">BADGE SYSTEM</h2>
+        <br>
+        <h2 class="center" style="color:#F15A29">{{ error_message }}</h2>
+        <br><br>
+        <a href="{% url 'login' %}">
+            <h3 class="center" style="color:#fff">Back To Home Page</h3>
+        </a>
+    </div>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+       $('body').css("background-image", "url('{% static 'tbadge_portal/img/background.jpg' %}')" )
+                .css("background-size", "cover");
+    });
+    </script>
+{% endblock %}

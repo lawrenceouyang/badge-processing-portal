@@ -1,0 +1,60 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Temporary Access Badge System - Login</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/login.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+
+{% block container %}
+        <div class="vertical-center">
+
+
+            {% if UNDER_CONSTRUCTION %}
+                <div class="row center">
+                    <span style='font-size:10em; margin-top: 50px; margin-bottom: 50px' class="white center glyphicon glyphicon-wrench"></span>
+                </div>
+                <h2 class="white center"> TABS is currently under scheduled maintenance and will return shortly.</h2>
+            {% else %}
+            <form action="" method="post" autocomplete="off">
+                <img src="{% static 'tbadge_portal/img/sfo_logo.png' %}" width="150px" class="img-center"/>
+                <h1 class="white center">TEMPORARY ACCESS</h1>
+                <h2 class="center" style="color:#64B5F6">BADGE SYSTEM</h2>
+                {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <input type="text" name= "username" required placeholder="Username" class="form-control"/>
+                        </div>
+                        <div class="col-md-4 col-md-offset-4">
+                            <input type="password" name="password" required placeholder="Password" class="form-control"/>
+                        </div>
+                        <div class="col-md-2 col-md-offset-5">
+                            <input type="submit" value="Login" id="login-button" class="main-button btn btn-block"/>
+                        </div>
+                    </div>
+            </form>
+            {% endif %}
+        </div>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+       $('body').css("background-image", "url('{% static 'tbadge_portal/img/background.jpg' %}')" )
+                .css("background-size", "cover");
+
+        console.log
+    });
+    </script>
+{% endblock %}

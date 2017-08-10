@@ -1,0 +1,152 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Badge - Lookup</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/js/validator.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+    <div class="vertical-center">
+        <h1 class="center">Badge Lookup By Date Range</h1>
+        <br>
+        <form id="search-form" action="{% url 'badge_results' %}?type=date" method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row">
+                <div class=form-group>
+                    <label for="from_date" class="col-md-1 col-md-offset-3 control-label" style="text-align: right">From:</label>
+                    <div class="col-md-4">
+                        <div class="input-group date" id="date-picker1">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                            <input type="text" class="form-control" id="from_date" name="from_date" required
+                             title="Please select a date and time.">
+                        </div>
+                            <label id="from-error" class="error" style="margin-bottom:0; margin-left: 38px; display:none">Please select a valid date.</label>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="from-date" name="from_date">
+            <div class="row" style="margin-top: 20px">
+                <div class=form-group>
+                    <label for="to_date" class="col-md-1 col-md-offset-3 control-label " style="text-align: right">To:</label>
+                    <div class="col-md-4">
+                        <div class="input-group date" id="date-picker2">
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                            <input type="text" class="form-control" id="to_date" name="to_date" required
+                             title="Please select a date and time.">
+                        </div>
+                            <label id="to-error" class="error" style="margin-bottom:0; margin-left: 38px; display:none">Please select a valid date.</label>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="to-date" name="to_date">
+            <div class="row">
+                <div class="form-group center" style="margin-top: 25px">
+                <input type="submit" id="submit-btn" class="btn btn-primary btn-lg" style="font-size:1.4em" value="Search">
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+{% block javascripts-after %}
+    <script>
+    $(function() {
+        $('#search-list').addClass("active");
+        $('label').on("click", function(e) {
+            e.preventDefault();
+        });
+        $('#container').css("margin", 0);
+        $fromDate = $('#from_date');
+        $fromError = $('#from-error');
+        $toDate = $('#to_date');
+        $toError = $('#to-error');
+
+        var today = new Date();
+        var month = (today.getMonth()+1).toString();
+        var day = today.getDate().toString();
+        var valid = true;
+        if (month.length == 1)
+                month = "0" + month;
+        if (day.length == 1)
+                day = "0" + day;
+        var stringDay = month + "/" + day + "/" + today.getFullYear();
+        $datepicker1 = $('#date-picker1');
+        $datepicker1.datepicker({});
+        $datepicker1.datepicker("setDate", stringDay);
+        $fromDate.val(stringDay);
+
+        $datepicker2 = $('#date-picker2');
+        $datepicker2.datepicker({});
+        $datepicker2.datepicker("setDate", stringDay);
+        $toDate.val(stringDay);
+
+        $datepicker1.datepicker().on('changeDate', function(e) {
+            if (moment(e.format(), "MM/DD/YYYY") > moment($toDate.val(), "MM/DD/YYYY")) {
+                $fromError.css("display", "inline-block");
+                valid = false;
+            }
+            else {
+                $fromError.css("display", "none");
+                temp = (e.format());
+                $fromDate.val(e.format());
+                valid = true;
+            }
+            if (moment(e.format(), "MM/DD/YYYY") <= moment($toDate.val(), "MM/DD/YYYY")) {
+                $toError.css("display", "none");
+            }
+        });
+
+        $datepicker2.datepicker().on('changeDate', function(e) {
+            if (moment(e.format(), "MM/DD/YYYY") >= moment($fromDate.val(), "MM/DD/YYYY")) {
+                $fromError.css("display", "none");
+                valid = true;
+            }
+            if (moment(e.format(), "MM/DD/YYYY") < moment($fromDate.val(), "MM/DD/YYYY")) {
+                $toError.css("display", "inline-block");
+                valid = false;
+            }
+            else {
+                $toError.css("display", "none");
+                temp = (e.format());
+                $toDate.val(e.format());
+                valid = true;
+            }
+        });
+
+        $searchForm = $('#search-form');
+        $searchForm.on("submit", function(e) {
+            if (valid) {
+                $fromDate.attr("disabled", true);
+                $toDate.attr("disabled", true);
+                var from = moment($fromDate.val(), "M/D/YYYY");
+                from.second(0);
+                from.minute(0);
+                from.hour(0);
+                var to = moment($toDate.val(), "M/D/YYYY");
+                to.second(59);
+                to.minute(59);
+                to.hour(23);
+                $('#from-date').val(from.format("YYYY-MM-DD HH:mm:ss"));
+                $('#to-date').val(to.format("YYYY-MM-DD HH:mm:ss"));
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+    });
+    </script>
+{% endblock %}

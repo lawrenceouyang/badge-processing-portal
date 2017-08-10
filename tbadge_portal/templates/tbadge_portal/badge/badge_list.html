@@ -1,0 +1,155 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Badges List View</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+    {% if type == "recent" %}
+        <h1 class="page-title">Recently Issued Badges (Last 24 Hours)</h1>
+    {% endif %}
+    {% if type == "overdue" %}
+        <h1 class="page-title">Overdue Badges</h1>
+    {% endif %}
+        <hr class="header-line">
+    </div>
+    {% if type == "recent" %}
+    <div id="issued-table" class="table-panel">
+        <table id="badge-issued" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+            <thead>
+                <tr>
+                    <th>Card Serial Number (CSN)</th>
+                    <th>Badge Type</th>
+                    <th>Issued To</th>
+                    <th>Escorted By</th>
+                    <th>Issued By</th>
+                    <th>Issued On</th>
+                    <th>Due On</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    {% endif %}
+    {% if type == "overdue" %}
+    <div id="overdue-table" class="table-panel">
+        <table id="badge-overdue" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+            <thead>
+                <tr>
+                    <th>Card Serial Number (CSN)</th>
+                    <th>Badge Type</th>
+                    <th>Issued To</th>
+                    <th>Escorted By</th>
+                    <th>Issued By</th>
+                    <th>Issued On</th>
+                    <th>Due On</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            $('#badges-list').addClass("active");
+            {% if type == "recent" %}
+                $(this).attr("title", "Recently Issued Badges");
+                var issued_data = JSON.parse('{{ issued_data | safe | escapejs }}');
+                $('#badge-issued').DataTable({
+                    "order": [5, "desc"],
+                    "dom": "ft<'col-sm-6'i><'col-sm-6'p>",
+                    "data": issued_data.data,
+                    "responsive": true,
+                    "language": {
+                    "emptyTable": "No badges found."
+                    },
+                    "columns": [
+                        { "data" : function(data) {
+                            var url = "{% url 'badge_view' "csnHolder" %}";
+                            url = url.replace("csnHolder", data.csn);
+                            return "<a href="+url+">"+data.csn+"</a>";
+                        }},
+                        { "data": "badge_type"},
+                        { "data" : function(data){
+                            var url = "{% url 'applicant_view' "appIDHolder"%}";
+                            url = url.replace("appIDHolder", intToHashid(data.applicant_id));
+                            if (data.applicant_middle_name != null)
+                                return "<a href="+url+">"+data.applicant_first_name + " " + data.applicant_middle_name + " " + data.applicant_last_name +"</a>";
+                            return "<a href="+url+">"+data.applicant_first_name + " " + data.applicant_last_name +"</a>";
+                        }},
+                        { "data": function(data) {
+                                if (data.badge_type == "Standard")
+                                    return "Not Applicable";
+                                if (data.escort_first_name != null && data.escort_last_name != null) {
+                                    var url = "{% url 'badge_escort_csn_to_upid' %}?csn=" + data.escort_csn;
+                                    if (data.escort_middle_name != null)
+                                        return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_middle_name + " " + data.escort_last_name + "</a>";
+                                    return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_last_name + "</a>";
+                                }
+                                return "(Not on File)";
+                            }
+                        },
+                        { "data": "issued_by"},
+                        { "data": "issued_on"},
+                        { "data": "due_on"}
+                    ]
+                });
+            {% endif %}
+            {% if type == "overdue" %}
+                $(this).attr("title", "Overdue Badges");
+                var overdue_data = JSON.parse('{{ overdue | safe | escapejs }}');
+                $('#badge-overdue').DataTable({
+                    "order": [5, "desc"],
+                    "dom": "ft<'col-sm-6'i><'col-sm-6'p>",
+                    "data": overdue_data.data,
+                    "responsive": true,
+                    "language": {
+                        "emptyTable": "No badges found."
+                    },
+                    "columns": [
+                        { "data" : function(data) {
+                            var url = "{% url 'badge_view' "csnHolder" %}";
+                            url = url.replace("csnHolder", data.csn);
+                            return "<a href="+url+">"+data.csn+"</a>";
+                        }},
+                        { "data": "badge_type"},
+                        { "data" : function(data){
+                            var url = "{% url 'applicant_view' "appIDHolder"%}";
+                            url = url.replace("appIDHolder", intToHashid(data.applicant_id));
+                            if (data.applicant_middle_name != null)
+                                return "<a href="+url+">"+data.applicant_first_name + " " + data.applicant_middle_name + " " + data.applicant_last_name +"</a>";
+                            return "<a href="+url+">"+data.applicant_first_name + " " + data.applicant_last_name +"</a>";
+                        }},
+                        { "data": function(data) {
+                                if (data.badge_type == "Standard")
+                                    return "Not Applicable";
+                                if (data.escort_first_name != null && data.escort_last_name != null) {
+                                    var url = "{% url 'badge_escort_csn_to_upid' %}?csn=" + data.escort_csn;
+                                    if (data.escort_middle_name != null)
+                                        return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_middle_name + " " + data.escort_last_name + "</a>";
+                                    return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_last_name + "</a>";
+                                }
+                                return "(Not on File)";
+                            }
+                        },
+                        { "data": "issued_by"},
+                        { "data": "issued_on"},
+                        { "data": "due_on"}
+                    ]
+                });
+            {% endif %}
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Badge Return</title>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block javascripts-before %}
+{% endblock %}
+
+{% block container %}
+     <div class="vertical-center">
+        <h1 class="center">Return a Badge</h1>
+        <br>
+        <form id="search-form" action="" method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div class="input-group add-on">
+                        <input id="badge-query" type="text" class="form-control"
+                               name="badge_query" placeholder="Tap Temporary Badge ..."
+                               required/>
+                        <div class="input-group-btn search-panel-type">
+                            <button id="search_submit" type="submit" class="btn btn-search">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+         <br>
+         <div class="row center">
+             <a class="btn btn-primary btn-lg" href="{% url 'login' %}">Home</a>
+         </div>
+
+    </div>
+{% endblock %}
+
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            $('#container').css("margin", 0);
+            $('#badge-query').focus()
+                             .on("blur", function() {
+                               $(this).focus();
+                             })
+                             .on("input", function() {
+
+                                 /* Force upper case alphabetical CSN characters */
+                                $(this).val(($(this).val().toUpperCase()));
+
+                                if ($(this).val().length == 16)
+                                    $('#search-form').submit();
+                                if ($(this).val().length > 16) {
+                                    $(this).val($(this).val().substring(0, 16));
+                                    $('#search-form').submit();
+                                }
+                            })
+        });
+    </script>
+{% endblock %}

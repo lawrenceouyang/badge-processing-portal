@@ -1,0 +1,182 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Badges List View</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Badges Issued Between</h1>
+        <hr class="header-line">
+    </div>
+    <div class="accordion" id="accordion-head">
+        <h1 class="head accordion-title" id="issued-badges-title"><span class="glyphicon glyphicon-minus glyphicon-mini"></span> Issued Badges</h1>
+        <div id="issued-table" class="table-panel">
+            <table id="badge-issued" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+                <thead>
+                    <tr>
+                        <th>Card Serial Number (CSN)</th>
+                        <th>Badge Type</th>
+                        <th>Issued To</th>
+                        <th>Issued By</th>
+                        <th>Issued On</th>
+                        <th>Due On</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <h1 class="head accordion-title"><span class="glyphicon glyphicon-plus glyphicon-mini"></span> Overdue Badges</h1>
+        <div id="overdue-table" class="table-panel">
+            <table id="badge-overdue" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+                <thead>
+                    <tr>
+                        <th>Card Serial Number (CSN)</th>
+                        <th>Badge Type</th>
+                        <th>Issued To</th>
+                        <th>Issued By</th>
+                        <th>Issued On</th>
+                        <th>Due On</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <h1 class="head accordion-title"><span class="glyphicon glyphicon-plus glyphicon-mini"></span> Returned Badges</h1>
+        <div id="returned-table" class="table-panel">
+            <table id="badge-returned" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+                <thead>
+                    <tr>
+                        <th>Card Serial Number (CSN)</th>
+                        <th>Badge Type</th>
+                        <th>Issued To</th>
+                        <th>Issued By</th>
+                        <th>Issued On</th>
+                        <th>Returned On</th>
+                        <th>Returned To</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <br><br>
+{% endblock %}
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            // Initialize data from api call
+            var issued_data = JSON.parse('{{ not_returned | safe | escapejs }}');
+            var overdue_data = JSON.parse('{{ overdue | safe | escapejs }}');
+            var returned_data = JSON.parse('{{ returned | safe | escapejs }}');
+
+            var from = moment("{{ from }}", "YYYY-MM-DD HH:mm:ss").format("M/D/YYYY");
+            var to = moment("{{ to }}", "YYYY-MM-DD HH:mm:ss").format("M/D/YYYY");
+            if (from == to)
+                $('.page-title').text("Badges Issued on " + from);
+            else
+                $('.page-title').text("Badges Issued from " + from + " to " + to );
+
+
+            $('#badge-issued').DataTable({
+                "order": [4, "desc"],
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": issued_data.data,
+                "responsive": true,
+                "pageLength": 5,
+                "language": {
+                "emptyTable": "No badges found."
+                },
+                "columns": [
+                    { "data" : function(data) {
+                        var url = "{% url 'badge_view' "csnHolder" %}";
+                        url = url.replace("csnHolder", data.csn);
+                        return "<a href="+url+">"+data.csn+"</a>";
+                    }},
+                    { "data": "badge_type"},
+                    { "data" : function(data){
+                        var url = "{% url 'applicant_view' "appIDHolder"%}";
+                        url = url.replace("appIDHolder", intToHashid(data.applicant_id));
+                        if (data.applicant_middle_name != null)
+                            return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_middle_name + " " + data.applicant_last_name + "</a>";
+                        return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_last_name + "</a>";
+                    }},
+                    { "data": "issued_by"},
+                    { "data": "issued_on"},
+                    { "data": "due_on"}
+                ]
+            });
+            $('#badge-overdue').DataTable({
+                "order": [4, "desc"],
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": overdue_data.data,
+                "responsive": true,
+                "pageLength": 5,
+                "language": {
+                "emptyTable": "No badges found."
+                },
+                "columns": [
+                    { "data" : function(data) {
+                        var url = "{% url 'badge_view' "csnHolder" %}";
+                        url = url.replace("csnHolder", data.csn);
+                        return "<a href="+url+">"+data.csn+"</a>";
+                    }},
+                    { "data": "badge_type"},
+                    { "data" : function(data){
+                        var url = "{% url 'applicant_view' "appIDHolder"%}";
+                        url = url.replace("appIDHolder", intToHashid(data.applicant_id));
+                        if (data.applicant_middle_name != null)
+                            return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_middle_name + " " + data.applicant_last_name + "</a>";
+                        return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_last_name + "</a>";
+                    }},
+                    { "data": "issued_by"},
+                    { "data": "issued_on"},
+                    { "data": "due_on"}
+                ]
+            });
+            $('#badge-returned').DataTable({
+                "order": [4, "desc"],
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": returned_data.data,
+                "responsive": true,
+                "pageLength": 5,
+                "language": {
+                    "emptyTable": "No badges found."
+                },
+                "columns": [
+                    { "data" : function(data) {
+                        var url = "{% url 'badge_view' "csnHolder" %}";
+                        url = url.replace("csnHolder", data.csn);
+                        return "<a href="+url+">"+data.csn+"</a>";
+                    }},
+                    { "data": "badge_type"},
+                    { "data" : function(data){
+                        var url = "{% url 'applicant_view' "appIDHolder"%}";
+                        url = url.replace("appIDHolder", intToHashid(data.applicant_id));
+                        if (data.applicant_middle_name != null)
+                            return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_middle_name + " " + data.applicant_last_name + "</a>";
+                        return "<a href="+url+">"+data.applicant_first_name+ " " + data.applicant_last_name + "</a>";
+                    }},
+                    { "data": "issued_by"},
+                    { "data": "issued_on"},
+                    { "data": "returned_on"},
+                    { "data": "returned_to"}
+                ]
+            });
+        $('.accordion .head').on("click", function() {
+            $(this).next().animate({"height": "toggle", "opacity": "toggle"});
+            $(this).find('span').toggleClass("glyphicon-plus");
+            $(this).find('span').toggleClass("glyphicon-minus");
+            return false;
+        });
+        $('#returned-table').hide();
+    });
+    </script>
+{% endblock %}

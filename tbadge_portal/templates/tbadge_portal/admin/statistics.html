@@ -1,0 +1,483 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Statistics</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+    .width-transition {
+        -webkit-transition: width 0.5s;
+        transition: width 0.5s;
+    }
+
+    .loading-transition {
+        transition: opacity 0.25s linear;
+        -webkit-transition: opacity 0.25s linear;
+    }
+    </style>
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/chartjs/Chart.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/chartjs/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+     <div class="header-group">
+        <h1 class="page-title">Badge Statistics Overview</h1>
+        <hr class="header-line">
+    </div>
+    <br>
+    <div id="date-filters" class="row form-group">
+        <div class="row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <div class="row">
+                    <div class="col-lg-4" style="margin-top:9px">
+                        <label for="display-by-field" class="right">Display By</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <select class="form-control" id="display-by-field" name="display_by">
+                            <option value="1">Monthly Report</option>
+                            <option value="2">Annual Report</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-lg-offset-4 width-transition">
+                        <select class="form-control" id="month-year-selector" name="month_year_selector" title="">
+                        </select>
+                    </div>
+                    <div class="col-lg-2 width-transition">
+                        <select class="form-control" id="month-of-year-selector" name="month_of_year_selector" title="">
+                        </select>
+                    </div>
+                </div>
+                <div id="loading-div" class="row loading-transition" style="opacity: 0">
+                    <div class="col-lg-4 col-lg-offset-4 center">
+                        <img id="status-icon" src="{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}">
+                        <span id="status-msg"> Retreiving Data...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+            <h3 class="page-title center">Total Badges Issued In <span class="date-range"></span></h3>
+            <hr class="header-line">
+            <canvas id="issued-chart-js" style="transition: all 0.5s ease 0s;"></canvas>
+    </div>
+    <div class="col-md-6">
+            <h3 class="page-title center">Badges Still Overdue From <span class="date-range"></span></h3>
+            <hr class="header-line">
+        <canvas id="overdue-chart-js" style="transition: all 0.5s ease 0s;"></canvas>
+    </div>
+{% endblock %}
+
+
+{% block javascripts-after %}
+    <script>
+        $(function () {
+            $('#admin-stats').addClass("active");
+
+            // INITIAL GRAPH DATA //
+            var statsData = JSON.parse('{{ stats | safe | escapejs }}').data;
+            var today = moment();
+            var labels = [];
+            var issuedLtdData = [];
+            var issuedStdData = [];
+            var overdueLtdData = [];
+            var overdueStdData = [];
+            var totalIssuedData = [];
+            var totalOverdueData = [];
+            for ( var i = 0; i < statsData.length; i++) {
+                // Set labels of graph
+                var day = moment(today).subtract(statsData.length - 1 - i, 'days');
+                labels[i] = day.format('M/D');
+                var dayData = statsData[i][day.format('MM/DD')];
+                issuedLtdData[i] = 0;
+                issuedStdData[i] = 0;
+                overdueLtdData[i] = 0;
+                overdueStdData[i] = 0;
+                if (dayData.badge_count.length > 0) {
+                    for (var j = 0; j < dayData.badge_count.length; j++) {
+                        if (dayData.badge_count[j].badgeType == "Standard")
+                            issuedStdData[i] = dayData.badge_count[j].count;
+                        else if (dayData.badge_count[j].badgeType == "Limited")
+                            issuedLtdData[i] = dayData.badge_count[j].count;
+                    }
+                }
+                if (dayData.overdue_badge_count.length > 0) {
+                    for (j = 0; j < dayData.overdue_badge_count.length; j++) {
+                        if (dayData.overdue_badge_count[j].badgeType == "Standard")
+                            overdueStdData[i] = dayData.overdue_badge_count[j].count;
+                        else if (dayData.overdue_badge_count[j].badgeType == "Limited")
+                            overdueLtdData[i] = dayData.overdue_badge_count[j].count;
+                    }
+                }
+                totalIssuedData[i] = issuedStdData[i] + issuedLtdData[i];
+                totalOverdueData[i] = overdueStdData[i] + overdueLtdData[i];
+            }
+
+            var issuedChart = new Chart($('#issued-chart-js'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Limited Duration",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(221,115,115,0.4)",
+                            borderColor: "rgba(221,115,115,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(221,115,115,1)",
+                            pointBackgroundColor: "rgba(221,115,115,1)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(221,115,115,1)",
+                            pointHoverBorderColor: "rgba(221,115,115,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: issuedLtdData,
+                            spanGaps: false
+                        },
+                        {
+                            label: "Standard",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(75,192,192,0.4)",
+                            borderColor: "rgba(75,192,192,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(75,192,192,1)",
+                            pointBackgroundColor: "rgba(221,115,115,0.5)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: issuedStdData,
+                            spanGaps: false
+                        },
+                        {
+                            label: "Total",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(59,53,97,0.4)",
+                            borderColor: "rgba(59,53,97,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(59,53,97,1)",
+                            pointBackgroundColor: "rgba(59,53,97,1)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(59,53,97,1)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: totalIssuedData,
+                            spanGaps: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                suggestedMax: 10,
+                                beginAtZero: true,
+                                callback: function(value) {
+                                    if (!(value%1)) return Number(value).toFixed(0);
+                                }
+                            }
+                        }]
+                    },
+                    tooltips: {
+                        mode: "label",
+                        callbacks: {
+                            beforeTitle: function() {
+                                return "Issued on";
+                            }
+                        }
+                    }
+                }
+                });
+            var overdueChart = new Chart($('#overdue-chart-js'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "Limited Duration",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(221,115,115,0.4)",
+                            borderColor: "rgba(221,115,115,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(221,115,115,1)",
+                            pointBackgroundColor: "rgba(221,115,115,1)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(221,115,115,1)",
+                            pointHoverBorderColor: "rgba(221,115,115,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: overdueLtdData,
+                            spanGaps: false
+                        },
+                        {
+                            label: "Standard",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(75,192,192,0.4)",
+                            borderColor: "rgba(75,192,192,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(75,192,192,1)",
+                            pointBackgroundColor: "rgba(75,192,192,1)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                            pointHoverBorderColor: "rgba(75,192,192,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: overdueStdData,
+                            spanGaps: false
+                        },
+                        {
+                            label: "Total",
+                            fill: false,
+                            lineTension: 0.2,
+                            backgroundColor: "rgba(59,53,97,0.4)",
+                            borderColor: "rgba(59,53,97,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(59,53,97,1)",
+                            pointBackgroundColor: "rgba(59,53,97,1)",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(59,53,97,1)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 2,
+                            pointHitRadius: 10,
+                            data: totalOverdueData,
+                            spanGaps: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                suggestedMax: 10,
+                                beginAtZero: true,
+                                callback: function (value) {
+                                    if (!(value % 1)) return Number(value).toFixed(0);
+                                }
+                            }
+                        }]
+                    },
+                    tooltips: {
+                        mode: "label",
+                        callbacks: {
+                            beforeTitle: function () {
+                                return "Overdue badges from";
+                            }
+                        }
+                    }
+                }
+                });
+            var overdueMax = Math.round(Math.max.apply(null, totalIssuedData)/10)*10;
+            if (overdueMax >= 10)
+                overdueChart.options.scales.yAxes[0].ticks.max = overdueMax;
+            overdueChart.update();
+
+            // JQUERY SELECTORS //
+            var $monthYearSelector = $('#month-year-selector');
+            var $displayByField = $('#display-by-field');
+            var $dateRange = $('.date-range');
+            var $monthofYearSelector = $('#month-of-year-selector');
+            var $statusIcon = $('#status-icon');
+            var $statusMsg = $('#status-msg');
+
+            // INITIAL DROP-DOWN OPTIONS //
+            $dateRange.text(today.format("MMMM - YYYY"));
+            $monthofYearSelector.append('<option>2015</option>');
+            for (i = 0; i <= today.month(); i++ )
+                $monthYearSelector.append('<option value="' + (i+1).toString() + '">' + moment({month: i}).format("MMM") + '</option>');
+            for (i = 2016; i <= today.year(); i++)
+                $monthofYearSelector.append('<option>' + i.toString() + '</option>');
+            $monthYearSelector.val(today.month() + 1);
+            $monthofYearSelector.val(today.year());
+
+            // ON CHANGE OF DISPLAY TYPE FIELD //
+            $displayByField.on("change", function() {
+                $monthYearSelector.find('option').remove();
+                $monthofYearSelector.find('option').remove();
+                if ($(this).val() == "1") {
+                    $monthofYearSelector.append('<option>2015</option>');
+                    for (i = 2016; i <= today.year(); i++)
+                        $monthofYearSelector.append('<option>' + i.toString() + '</option>');
+                    $monthofYearSelector.val(today.year()).parent().fadeToggle(400);
+                    if ($monthofYearSelector.val() != today.year())
+                        for (i = 0; i < 12; i++ )
+                            $monthYearSelector.append('<option value="' + (i+1).toString() + '">' + moment({month: i}).format("MMM") + '</option>');
+                    else
+                        for (i = 0; i < today.month() + 1; i++ )
+                            $monthYearSelector.append('<option value="' + (i+1).toString() + '">' + moment({month: i}).format("MMM") + '</option>');
+                    $monthYearSelector.val(today.month() + 1).change().parent().addClass("col-lg-2").removeClass("col-lg-4");
+                }
+                if ($(this).val() == "2") {
+                    $monthYearSelector.append('<option>2015</option>');
+                    for (i = 2016; i <= today.year(); i++)
+                        $monthYearSelector.append('<option>' + i.toString() + '</option>');
+                    $monthYearSelector.val(today.year()).change().parent().addClass("col-lg-4").removeClass("col-lg-2");
+                    $monthofYearSelector.parent().fadeToggle(400);
+                }
+            });
+
+            // AJAX CALL ON CHANGING VALUE //
+            var updateChart = function() {
+                $('#loading-div').css("opacity", 100);
+                var statsData;
+                var url;
+                if ($displayByField.val() == 1)
+                    url = "{% url 'admin_statistics' %}?type=" + $displayByField.val().toString() + "&value=" + $monthYearSelector.val() + "&year=" + $monthofYearSelector.val();
+                else
+                    url = "{% url 'admin_statistics' %}?type=" + $displayByField.val().toString() + "&value=" + $monthYearSelector.val();
+                $.ajax({
+                    url: url,
+                    dataType : "json"
+                }).done(function(data) {
+                    $('#loading-div').css("opacity", 0);
+                    $monthYearSelector.prop("disabled", false).focus();
+                    $monthofYearSelector.prop("disabled", false);
+                    statsData = data.data;
+                    console.log(statsData);
+                    issuedLtdData = [];
+                    issuedStdData = [];
+                    overdueLtdData = [];
+                    overdueStdData = [];
+                    totalIssuedData = [];
+                    totalOverdueData = [];
+                    labels = [];
+                    var dayData;
+                    for (var i = 0; i < statsData.length; i++) {
+                        if ($displayByField.val() == 1) {
+                            var day = moment({year: $monthofYearSelector.val(), month: $monthYearSelector.val() - 1, day: i+1});
+                            labels[i] = day.format('M/D');
+                            dayData = statsData[i][day.format('MM/DD')];
+                        }
+                        else if ($displayByField.val() == 2) {
+                            var month = moment({year: $monthYearSelector.val(), month: i});
+                            labels[i] = month.format('MMM');
+                            console.log($monthYearSelector.val());
+                            dayData = statsData[i][month.format("MM/YYYY")];
+                        }
+                        issuedLtdData[i] = 0;
+                        issuedStdData[i] = 0;
+                        overdueLtdData[i] = 0;
+                        overdueStdData[i] = 0;
+                        if (dayData.badge_count.length > 0) {
+                            for (j = 0; j < dayData.badge_count.length; j++) {
+                                    if (dayData.badge_count[j].badgeType == "Standard")
+                                        issuedStdData[i] = dayData.badge_count[j].count;
+                                    else if (dayData.badge_count[j].badgeType == "Limited")
+                                        issuedLtdData[i] = dayData.badge_count[j].count;
+                            }
+                        }
+                        if (dayData.overdue_badge_count.length > 0) {
+                            for (j = 0; j < dayData.overdue_badge_count.length; j++) {
+                                if (dayData.overdue_badge_count[j].badgeType == "Standard")
+                                    overdueStdData[i] = dayData.overdue_badge_count[j].count;
+                                else if (dayData.overdue_badge_count[j].badgeType == "Limited")
+                                    overdueLtdData[i] = dayData.overdue_badge_count[j].count;
+                            }
+                        }
+                        totalIssuedData[i] = issuedStdData[i] + issuedLtdData[i];
+                        totalOverdueData[i] = overdueStdData[i] + overdueLtdData[i];
+                    }
+                    issuedChart.data.labels = labels;
+                    overdueChart.data.labels = labels;
+                    issuedChart.data.datasets[0].data = issuedLtdData;
+                    issuedChart.data.datasets[1].data = issuedStdData;
+                    issuedChart.data.datasets[2].data = totalIssuedData;
+                    overdueChart.data.datasets[0].data = overdueLtdData;
+                    overdueChart.data.datasets[1].data = overdueStdData;
+                    overdueChart.data.datasets[2].data = totalOverdueData;
+                    overdueMax = Math.round(Math.max.apply(null, totalIssuedData)/10)*10;
+                    if (overdueMax >= 10)
+                        overdueChart.options.scales.yAxes[0].ticks.max = overdueMax;
+                    else
+                        delete overdueChart.options.scales.yAxes[0].ticks.max;
+                    issuedChart.update();
+                    overdueChart.update();
+                })
+                .fail(function(data) {
+                    $monthYearSelector.prop("disabled", false).focus();
+                    $monthofYearSelector.prop("disabled", false);
+                    $statusIcon.css("width", "32px").css("height", "32px").prop("src", "{% static 'tbadge_portal/img/status-icons/warning-icon.png' %}");
+                    $statusMsg.html("Failed to load data. Click <a id='retry-link' class='hrefless-pointer'>here</a> to try again.");
+                    $('#retry-link').on("click", function() {
+                        $statusIcon.prop("src", "{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}");
+                        $statusMsg.text("Retrieving Data...");
+                        $monthYearSelector.change();
+                    });
+                });
+            };
+
+            $monthYearSelector.on("change", function() {
+                $statusIcon.prop("src", "{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}");
+                $statusMsg.text("Retrieving Data...");
+                $(this).prop("disabled", true);
+                $monthofYearSelector.prop("disabled", true);
+                if ($displayByField.val() == 1)
+                    $dateRange.text(moment({month: $monthYearSelector.val() - 1, year:$monthofYearSelector.val()}).format("MMMM - YYYY"));
+                else
+                    $dateRange.text(moment({year: $monthYearSelector.val()}).format("YYYY"));
+                updateChart();
+            });
+            $monthofYearSelector.on("change", function() {
+                $statusIcon.prop("src", "{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}");
+                $statusMsg.text("Retrieving Data...");
+                $(this).prop("disabled", true);
+                $monthYearSelector.prop("disabled", true);
+                $monthYearSelector.find('option').remove();
+                if ($(this).val() != today.year())
+                    for (i = 0; i < 12; i++ )
+                        $monthYearSelector.append('<option value="' + (i+1).toString() + '">' + moment({month: i}).format("MMM") + '</option>');
+
+                else
+                    for (i = 0; i < today.month() + 1; i++ )
+                        $monthYearSelector.append('<option value="' + (i+1).toString() + '">' + moment({month: i}).format("MMM") + '</option>');
+                $dateRange.text(moment({month: $monthYearSelector.val() - 1, year: $monthofYearSelector.val()}).format("MMMM - YYYY"));
+                updateChart();
+            });
+        });
+    </script>
+{% endblock %}

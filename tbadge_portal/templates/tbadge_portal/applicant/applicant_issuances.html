@@ -1,0 +1,120 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Badges List View</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Badge Issuance History</h1>
+        <h4>Applicant: <a id="applicant-link" href="{% url 'applicant_view' applicant_id %}">{{ applicant }}</a></h4>
+        <hr class="header-line">
+    </div>
+    <table id="badge-issued" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+        <thead>
+            <tr>
+                <th>Card Serial Number (CSN)</th>
+                <th>Issued On</th>
+                <th>Escorted By</th>
+                <th>Badge Type</th>
+                <th>Badge Status</th>
+                <th>Issued By</th>
+                <th>Returned On</th>
+                <th>Returned To</th>
+            </tr>
+        </thead>
+    </table>
+    <div class="row" style=" margin-top: 65px">
+            <span class="right" style="margin-right: 42px">
+                <a id="issued-link" class="btn btn-primary btn-lg" href="{% url 'applicant_view' applicant_id %}" >Return to Profile</a>
+            </span>
+        </div>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            issuance_data = JSON.parse('{{ issuance | safe | escapejs }}').data;
+            $(this).attr("title", "Badge Issuance History: {{ applicant }}");
+            $('#badge-issued').DataTable({
+                "bSort": false,
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": issuance_data,
+                "responsive": true,
+                "language": {
+                    "emptyTable": "No issued badges found."
+                },
+                "columns": [
+                    { "data" : function(data) {
+                        {% if request.session.role == 'Admin' %}
+                            var url = "{% url 'badge_view' "csnHolder" %}";
+                            url = url.replace("csnHolder", data.badge_csn);
+                            return "<a href="+url+">"+data.badge_csn+"</a>";
+                        {% else %}
+                            return data.badge_csn;
+                        {% endif %}
+                    }},
+                    { "data": "issued_on"},
+                    { "data": function(data) {
+                        if (data.escort_first_name != null && data.escort_last_name != null && data.escort_badge_csn != null) {
+                        {% if request.session.role == 'Admin' %}
+                            url = "{% url 'badge_escort_csn_to_upid' %}?csn=" + data.escort_badge_csn;
+                            if (data.escort_middle_name != null)
+                                return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_middle_name + " " + data.escort_last_name + "</a>";
+                            return "<a href='" + url + "'>" + data.escort_first_name + " " + data.escort_last_name + "</a>";
+                        {% else %}
+                            if (data.escort_middle_name != null)
+                                return data.escort_first_name + " " + data.escort_middle_name + " " + data.escort_last_name;
+                            return data.escort_first_name + " " + data.escort_last_name;
+                        {% endif %}
+                        }
+                        else if (data.escort_badge_csn != null)
+                            return "(Not on File)";
+                        else
+                            return "Not Applicable";
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.overrided)
+                            return data.badge_type + " (Overidden)";
+                        return data.badge_type
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.badge_status == "not_returned") {
+                            if (moment() > moment(data.due_on, "MM/DD/YYYY hh:mm a"))
+                                return "<label class='label label-danger'>Overdue</label>";
+                            return "<label class='label label-primary'>Issued</label>";
+                        }
+                        else
+                            return "<label class='label label-success'>Returned</label>";
+                        }
+                    },
+                    { "data": "issued_by"},
+                    { "data": function(data) {
+                        if (data.returned_on == null)
+                            return "Not Returned";
+                        return data.returned_on;
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.returned_to == null)
+                            return "Not Returned";
+                        return data.returned_to;
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+{% endblock %}

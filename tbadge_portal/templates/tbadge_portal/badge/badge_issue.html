@@ -1,0 +1,1217 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Issue Badge</title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/jquery-steps/css/jquery.steps.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/confirm/css/jquery-confirm.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/jquery-steps/js/jquery.steps.js' %}"></script>
+    <script src="{% static 'tbadge_portal/confirm/js/jquery-confirm.js' %}"></script>
+    <script src="{% static 'tbadge_portal/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'tbadge_portal/js/validator.js' %}"></script>
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+
+    <div class="header-group">
+        <h1 id="header" class="page-title">
+                {% if type == 'ld' %}
+                    <span>Issue Limited Duration Badge</span>
+                {% else %}
+                    <span>Issue Standard Badge</span>
+                {% endif %}
+        </h1>
+        <hr class="header-line">
+    </div>
+
+{#    Begin jQuery Steps Form #}
+
+    <div id="loading-issuance" class="row" style="text-align: center;">
+        <img id = "ld-iss-ic" style="max-width: 85%; max-height: 85%" src="{% static 'tbadge_portal/img/loading-icons/large-snek.gif' %}">
+        <h2> Preparing badge issuance ...</h2>
+    </div>
+
+    <div id="issue-badge" style="display: none;">
+
+        <!-- Step 1 -->
+        <h2> Applicant Information </h2>
+        <section>
+            <h2>Step 1. Applicant Information </h2>
+            <br>
+            <!-- Form Beginning -->
+            <form id="step1-form" role="form" class="form-horizontal" action="" method="post" autocomplete="off">
+
+                <!-- Information -->
+                <div style= "float:left" id="form-group" class="col-md-8">
+                    <!-- First Name -->
+                    <div class=form-group>
+                        <label for="first_name_0" class="col-md-3 control-label required">First Name</label>
+                        <div class="col-md-7" style="margin-bottom: 25px">
+                            <input style="text-align:center" type="text" class="form-control"
+                                   pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                                   placeholder="Waiting for data from scanner ..." id="first_name_0" name="first_name_0" maxlength="100" required>
+                        </div>
+                    </div>
+
+                    <!-- Middle Name -->
+                    <div class=form-group>
+                        <label for="middle_name_0" class="col-md-3 control-label">Middle Name</label>
+                        <div class="col-md-7" style="margin-bottom: 25px">
+                            <input style="text-align:center" type="text" class="form-control"
+                                   pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                                   placeholder="Waiting for data from scanner ..." id="middle_name_0" name="middle_name_0" maxlength="100">
+                        </div>
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class=form-group>
+                        <label for="last_name_0" class="col-md-3 control-label required">Last Name</label>
+                        <div class="col-md-7" style="margin-bottom: 25px">
+                            <input style="text-align:center" type="text" class="form-control"
+                                   pattern="^[a-zA-Z\.\,\-]+( [a-zA-Z\.\,\-]+)*$"
+                                   placeholder="Waiting for data from scanner ..." id="last_name_0" name="last_name_0" maxlength="100" required>
+                        </div>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class=form-group>
+                        <label for="dob_0" class="col-md-3 control-label required">Date of Birth <br> <i style="font-weight: normal">(MM/DD/YYYY)</i></label>
+                        <div class="col-md-7" style="margin-bottom: 25px">
+                            <input style="text-align:center" type="text" class="form-control" placeholder="Waiting for data from scanner ..." id="dob_0" name="dob_0" maxlength="100" required>
+                        </div>
+                    </div>
+
+                    <!-- Hidden clear all button -->
+                    <div class="form-group col-md-10">
+                        <span>
+                            <a id="clear_1" class="btn btn-primary btn-lg" style="float:right" > <i> Clear All Fields </i> </a>
+                        </span>
+                        <span style="margin-right: 20px">
+                           <a id="manual_1" class="btn btn-danger btn-lg" style="float:right; margin-right: 20px"> <i id="manual_1_text"> Manual Entry </i> </a>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Instruction -->
+                <div class="col-md-4" style="text-align:center">
+                    <img id = "step_1_instruction_img" style="max-width: 85%; max-height: 85%" src="{% static 'tbadge_portal/img/badge-icons/swipe-photo.png' %}">
+                    <h2 id = "step_1_instruction_text">Please swipe the government issued ID on the device mounted to your monitor.</h2>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- Step 2 -->
+        <h2> Applicant Results</h2>
+        <section>
+            <h2> Step 2. Applicant Results </h2>
+            <br>
+                <!-- Information -->
+                <div style= "float:left" class="col-md-8">
+                    <!-- First Name -->
+                    <div class=form-group>
+                        <label for="first_name_1" class="col-md-3 control-label">First Name</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center" type="text" class="form-control" id="first_name_1" name="first_name_1" maxlength="100" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Middle Name -->
+                    <div class=form-group>
+                        <label for="middle_name_1" class="col-md-3 control-label">Middle Name</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center" type="text" class="form-control" id="middle_name_1" name="middle_name_1" maxlength="100" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class=form-group>
+                        <label for="last_name_1" class="col-md-3 control-label">Last Name</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center" type="text" class="form-control" id="last_name_1" name="last_name_1" maxlength="100" disabled>
+                        </div>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class=form-group >
+                        <label for="dob_1" class="col-md-3 control-label">Date of Birth</label>
+                        <div class="col-md-7" style="margin-bottom:50px">
+                            <input style="text-align:center" type="text" class="form-control" id="dob_1" name="dob_1" maxlength="100" disabled>
+                        </div>
+                    </div>
+
+                     <!-- No Fly -->
+                    <div class=form-group>
+                        <label for="no_fly_1" class="col-md-3 control-label">No-Fly Status</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center;" type="text" class="form-control" id="no_fly_1" name="no_fly_1" maxlength="100" value="Checking records ..." readonly>
+                        </div>
+                    </div>
+
+                    <!-- Adjudication -->
+                    <div class=form-group>
+                        <label for="adjudication_1" class="col-md-3 control-label">Adjudication Status</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center;" type="text" class="form-control" id="adjudication_1" name="adjudication_1" value="Checking records ..." maxlength="100" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Issuance Limit -->
+                    <div class=form-group>
+                        <label for="issuance_limit_1" class="col-md-3 control-label">Issuance Limit Status</label>
+                        <div class="col-md-7">
+                            <input style="text-align:center;" type="text" class="form-control" id="issuance_limit_1" name="issuance_limit_1" value="Checking records ..." maxlength="100" readonly>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Instruction -->
+                <div id="instructions" class="col-md-4" style="text-align:center; display:table-cell">
+                    <img id="request_image" src="{% static 'tbadge_portal/img/loading-icons/request.gif' %}">
+                    <h2 id="request_status"> <img src="{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}"> Verifying Applicant Records...</h2>
+                    <h2 id="request_reason"></h2>
+                    <h2 id="request_instructions"></h2>
+                </div>
+
+        </section>
+
+        <!-- Step 3 -->
+        <h2> Badge Information </h2>
+        <section>
+            <h2> Step 3. Badge Information </h2>
+            <br>
+                <form id="step3-form" role="form" class="form-horizontal" action="" method="post" autocomplete="off">
+                    <!-- Information -->
+                    <div style= "float:left" class="col-md-9">
+                        <!-- First Name -->
+                        <div class=form-group>
+                            <label for="first_name_2" class="col-md-3 control-label">First Name</label>
+                            <div class="col-md-7">
+                                <input style="text-align:center; margin-bottom: 0px" type="text" class="form-control" id="first_name_2" name="first_name_2" maxlength="100" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Middle Name -->
+                        <div class=form-group>
+                            <label for="middle_name_2" class="col-md-3 control-label">Middle Name</label>
+                            <div class="col-md-7">
+                                <input style="text-align:center; margin-bottom: 0px" type="text" class="form-control" id="middle_name_2" name="middle_name_2" maxlength="100" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class=form-group>
+                            <label for="last_name_2" class="col-md-3 control-label">Last Name</label>
+                            <div class="col-md-7">
+                                <input style="text-align:center; margin-bottom: 0px" type="text" class="form-control" id="last_name_2" name="last_name_2" maxlength="100" disabled>
+                            </div>
+                        </div>
+
+                        <!-- DOB -->
+                        <div class=form-group >
+                            <label for="dob_2" class="col-md-3 control-label">Date of Birth</label>
+                            <div class="col-md-7" style="margin-bottom:20px">
+                                <input style="text-align:center; margin-bottom: 25px" type="text" class="form-control" id="dob_2" name="dob_2" maxlength="100" disabled>
+                            </div>
+                        </div>
+
+                         <!-- New Badge -->
+                        <div class=form-group>
+                            <label for="new_badge" class="col-md-3 control-label required">New Badge CSN</label>
+                            <div class="col-md-7">
+                                <input style="text-align:center" type="text" class="form-control" placeholder="Waiting for data from scanner ..." id="new_badge" name="new_badge" maxlength="100" required>
+                                <div id="new_status" style="font-weight: normal; text-align:right; display: none" class="col-md-12">
+                                    <img id ="snek-icon-2" src="{% static 'tbadge_portal/img/loading-icons/small-snek.gif' %}">
+                                    <span><i id="loading-msg-2">Validating temporary badge...</i></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Escort Badge -->
+                        {% if type == "ld" %}
+                        <div class=form-group>
+                            <label for="escort_badge" class="col-md-3 control-label required">Escort Badge CSN</label>
+                            <div class="col-md-7">
+                                <input style="text-align:center" type="text" class="form-control" id="escort_badge" name="escort_badge" maxlength="100" readonly required>
+                                <div id="escort_status" style="font-weight: normal; text-align:right; display: none" class="col-md-12">
+                                    <img id ="snek-icon" src="{% static 'tbadge_portal/img/loading-icons/small-snek.gif' %}">
+                                    <span style="font-style: italic" id="loading-msg"></span>
+                                    <span style="font-style: italic" id="loading-msg-name"></span>
+                                    <span style="font-style: italic" id="loading-msg-status"></span>
+                                    <span style="font-style: italic" id="loading-msg-escort"></span>
+                                    <span style="font-style: italic" id="loading-msg-override">
+                                        <a id = 'override_escort_result' style = 'cursor: pointer'> Override. </a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Clear Badge CSNs -->
+                        <div class="col-md-10">
+                            <span>
+                                <a id="clear_3" class="btn btn-primary btn-lg" style="float:right" >
+                                    {% if type == "ld" %}
+                                        <i> Clear Badges </i>
+                                    {% else %}
+                                        <i> Clear Badge </i>
+                                    {% endif %}
+                                </a>
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- Instruction -->
+                    <div id ="step_3_instructions" class="col-md-3" style="text-align:center">
+                        <img id="step_3_instruction_img" src="{% static 'tbadge_portal/img/badge-icons/tap-id-icon.png' %}">
+                        <h2 id="step_3_instruction_text" style="text-align:center"></h2>
+
+                    </div>
+                </form>
+        </section>
+
+        <!-- Step 4 -->
+        <h2> Issue Badge </h2>
+        <section>
+            <div id="finish_section" class="col-md-12" style="margin-top: 100px; text-align:center">
+                    <img id="issued_img" src="{% static 'tbadge_portal/img/loading-icons/request.gif' %}">
+                    <h1 id="issue_result" style="text-align:center;"></h1>
+                    <h1 id="issued_to_result" style="text-align:center">Processing badge issuance ...</h1>
+                    <h1 id="due_date_id" style="text-align:center; color: #BE1E2D"></h1>
+                    <h3 id="redirect_directions" style="text-align:center"><i></i></h3>
+            </div>
+        </section>
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(document).ready(function() {
+
+        var preventExit = true;
+
+        window.onbeforeunload = function () {
+            if (preventExit) return "Are you sure you want to leave this page? This will cancel the badge issuance.";
+        };
+        var goHome = function(){
+            preventExit = false;
+            window.location.replace('{% url 'login' %}');
+        };
+
+        var goToProfile = function(url) {
+            preventExit = false;
+            window.location.replace(url);
+        };
+
+        var reissueBadge = function(){
+            preventExit = false;
+            var reissueUrl = "{% url 'badge_issue' %}";
+            if(badgeType == "Limited") reissueUrl = reissueUrl +"?type=ld";
+            else reissueUrl = reissueUrl +"?type=standard";
+            var href = window.location.href;
+            window.location = href.replace("{% url 'badge_issue' %}"+reissueUrl);
+        };
+
+        // Pressing enter will attempt to go to the next step //
+        $(document).keypress(function (e) {
+            if (e.which == 13) { $("#issue-badge").steps("next"); }
+        });
+
+        var cancelConfirm = function() {
+            $.confirm({
+                theme: "black",
+                title: "Confirm Cancel",
+                closeIcon: true,
+                backgroundDismiss: true,
+                content: "<p>Are you sure you want to cancel this issuance?</p>",
+                confirmButton: "Yes",
+                cancelButton: "Go Back",
+                confirmButtonClass:"btn-primary",
+                cancelButtonClass:" btn-danger",
+                keyboardEnabled: true,
+                confirm: function() {
+                    goHome();
+                },
+                cancel: function() {
+                  console.log("cancel");
+                }
+            });
+        };
+
+        var clearStep1 = function() {
+            if(!($('#clear_1').is('[disabled=disabled]'))) {
+                if (manual_entry) $('#middle_name_0').attr("placeholder", "Please enter a middle name ...");
+                else $('#middle_name_0').attr("placeholder", "Waiting for data from scanner ...");
+                $('#first_name_0').val("").prop("readonly", false).focus();
+                $('#middle_name_0').val("").prop("readonly", false);
+                $('#last_name_0').val("").prop("readonly", false);
+                $('#dob_0').val("").prop("readonly", false);
+                $('#clear_1').attr("disabled", true);
+                $('#step1-form').validate().resetForm();
+                checkStep1Instructions();
+            }
+            else {
+                $('#first_name_0').focus();
+            }
+        };
+
+        var unlockStep1 = function() {
+            manual_entry = true;
+            $('#manual_1').attr("disabled", true);
+            $("#first_name_0").prop("readonly", false).attr("placeholder", "Please enter a first name ...").focus();
+            $("#middle_name_0").prop("readonly", false).attr("placeholder", "Please enter a middle name ...");
+            $("#last_name_0").prop("readonly", false).attr("placeholder", "Please enter a last name ...");
+            $("#dob_0").prop("readonly", false).attr("placeholder", "Please enter a date of birth (MM/DD/YYYY) ...");
+            $('#step_1_instruction_img').attr("src", type_url);
+            $('#step_1_instruction_text').text("Please type in the applicant's information from their government issued ID.");
+            checkInputValidity();
+        };
+
+        var clearStep3 = function(){
+            if(!($('#clear_3').is('[disabled=disabled]'))) {
+                $('#new_badge').val("").attr("readonly", false).focus();
+                $('#new_status').hide();
+                $("#escort_badge").val("").attr("readonly", true);
+                $("#escort_status").hide();
+                $("#loading-msg-name").text("");
+                $("#loading-msg-status").text("");
+                $("#loading-msg-escort").text("");
+                $("#clear_3").attr("disabled", true);
+                temporary_validation = false;
+                {% if type == "ld" %}
+                    escort_validation = false;
+                {% endif %}
+                checkStep3Instructions();
+                $('#step3-form').validate().resetForm();
+            }
+            else {
+                $('#new_badge').focus();
+            }
+        }
+
+        var returnBadge = function(csn) {
+            var ret_url = '{% url 'badge_view' "replaceMe" %}?action=return&type=inline';
+            ret_url = ret_url.replace('replaceMe', csn);
+            $.ajax({
+                url: ret_url,
+                type: 'GET',
+                dataType: 'json',
+                data: { action: "return",
+                        type: "inline",
+                        csrfmiddlewaretoken: '{{csrf_token}}'
+                },
+                success: function(){
+                    $("#snek-icon-2").attr("src", success_url );
+                    $("#loading-msg-2").text("Badge returned. This badge can now be issued.").css('color', 'black');
+                    $("#new_badge").prop("readonly", true);
+                    $("#escort_badge").prop('readonly', false);
+                    if(badgeType == "Limited") {
+                        $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-escort-photo.png' %}");
+                        $('#step_3_instruction_text').text("Please tap the escort badge on the badge reader.");
+                    }
+                    else if (badgeType == "Standard") {
+                            $('#step_3_instruction_img').attr('src', step3_success_std_url);
+                            $('#step_3_instruction_text').text("Badge Accepted. Please click 'Issue Badge' to complete the issuance.");
+                    }
+                    $("#escort_badge").focus();
+                    temporary_validation = true;
+                },
+                error: function() {
+                    $("#snek-icon-2").attr("src", warning_url );
+                    $("#loading-msg-2").css('color', 'black').text("The server ran into an issue when returning this badge.")
+                            .append("<span> <a id = 'retry_return'> Retry. </a> </span>");
+                    $('#retry_return').click( function() { returnBadge(csn);});
+                }
+            });
+        };
+
+        var type_url = "{% static 'tbadge_portal/img/badge-icons/type-icon.png' %}";
+        var swipe_url = "{% static 'tbadge_portal/img/badge-icons/swipe-photo.png' %}";
+        var step1_success_url = "{% static 'tbadge_portal/img/badge-icons/step1-confirmed-icon.png' %}";
+        var step3_success_ld_url = "{% static 'tbadge_portal/img/badge-icons/step3-confirm-ls-icon.png' %}";
+        var step3_success_std_url = "{% static 'tbadge_portal/img/badge-icons/step3-confirm-std-icon.png' %}";
+        var error_url = "{% static 'tbadge_portal/img/status-icons/error-icon-sm.png' %}";
+        var success_url = "{% static 'tbadge_portal/img/status-icons/success-icon-sm.png' %}";
+        var warning_url = "{% static 'tbadge_portal/img/status-icons/warning-icon-sm.png' %}";
+        var snek_url = "{% static 'tbadge_portal/img/loading-icons/small-snek.gif' %}";
+
+        var badgeType;
+        var manual_entry = false;
+        var requestId;
+        var applicantId;
+        var request_validation = true;
+        var temporary_validation = false;
+        var escort_validation = false;
+        var override_validation = false;
+        var escortUpid = "";
+        var n = 30;
+
+        function countDown(){
+            n--;
+            $('#redirect_directions').text("(This page will redirect to the home page in "+n+" seconds)");
+            if (n == 0) {
+                goHome();
+            }
+        }
+
+        function overrideStep(){
+            override_validation = true;
+            request_validation = true;
+            $("#issue-badge").steps("next");
+        }
+
+        function overrideEscortStatus() {
+            $("#snek-icon").attr("src", success_url );
+            $("#loading-msg").text("(Overridden) " + $("#loading-msg").text());
+            $("#override_escort_result").hide();
+            $('#step_3_instruction_img').attr('src', step3_success_ld_url);
+            $('#step_3_instruction_text').text("Override Accepted. Please click 'Issue Badge' to complete the issuance.");
+            $("#escort_badge").prop("readonly", true).blur("");
+            escort_validation = true;
+        }
+
+        {% if type == "ld" %}
+            badgeType = "Limited";
+        {% else %}
+            badgeType = "Standard";
+            escort_validation = true;
+        {% endif %}
+
+        /* jQuery Steps */
+        $("#issue-badge").steps({
+            headerTag: "h2",
+            bodyTag: "section",
+            transitionEffect: "slideLeft",
+            height: "auto",
+            forceMoveForward: true,
+            autoFocus: true,
+
+            labels: {
+                next: "Check Records >"
+            },
+
+            /* Events */
+            onStepChanging: function (event, currentIndex) {
+                switch(currentIndex) {
+                    case 0:
+                        if($('#step1-form').valid()) {
+                            event.preventDefault();
+                            createRequest();
+                            return true;
+                        }
+                        break;
+                    case 1:
+                        if(request_validation == false) return false;
+                        $('#first_name_2').val($('#first_name_0').val());
+                        $('#middle_name_2').val($('#middle_name_0').val());
+                        $('#last_name_2').val($('#last_name_0').val());
+                        $('#dob_2').val($('#dob_0').val());
+                        enableNext();
+                        return true;
+                        break;
+                    case 2:
+                        if(temporary_validation == false) return false;
+                        if (escort_validation == false) return false;
+                        if($('#step3-form').valid()) {
+                            $('a[href="#finish"]').hide();
+                            event.preventDefault();
+                            createIssuance();
+                            return true;
+                        }
+                        break;
+                    default:
+                        return true;
+                        break;
+                }
+            },
+            onStepChanged: function (event, currentIndex) {
+                var $next = $('a[href="#next"]');
+                switch (currentIndex) {
+                    case 0:
+                        $next.text('Next >');
+                        break;
+                    case 1:
+                        $next.text('Proceed >');
+                        $('#issue-badge-t-0').attr("disabled", "disabled");
+                        $('#first_name_1').val($('#first_name_0').val());
+                        $('#middle_name_1').val($('#middle_name_0').val());
+                        $('#last_name_1').val($('#last_name_0').val());
+                        $('#dob_1').val($('#dob_0').val());
+                        break;
+                    case 2:
+                        $next.text('Issue Badge >');
+                        if (override_validation) {
+                            $('#step_3_instructions').append("<h3 class='dng'>Note: This issuance is overridden.</h3>");
+                        }
+                        $('#issue-badge-t-1').attr("disabled", "disabled");
+                        $('#new_badge').focus();
+                        $next.show();
+                        $('#cancel_btn').show();
+                        break;
+                    case 3:
+                        $('#issue-badge-t-2').attr("disabled", "disabled");
+                        break;
+                    default:
+                        $next.text('Next');
+                }
+            }
+        });
+
+        /* Validation */
+        var step1 = $('#step1-form').validate({
+            rules: {
+                first_name_0: {
+                    required: true,
+                    whitespace: true
+                },
+                last_name_0: {
+                    required: true,
+                    whitespace: true
+                },
+                dob_0: {
+                    required: true,
+                    date_format: true,
+                    whitespace: true
+                }
+            },
+            messages: {
+                first_name_0: "Please manually enter a valid first name under 50 characters.",
+                last_name_0: "Please manually enter a valid last name under 50 characters.",
+                dob_0: "Please enter a valid date of birth (MM/DD/YYYY)."
+            }
+        });
+
+        var step3 = $('#step3-form').validate({
+            onfocusout: function (element, event) {
+                // Purposely do nothing. Only make API call on input.
+            },
+            rules: {
+                new_badge: {
+                    whitespace: true,
+                    any_whitespace: true,
+                    is_hexadecimal: true
+                },
+                escort_badge: {
+                    whitespace: true,
+                    any_whitespace: true,
+                    is_hexadecimal: true,
+                }
+            },
+            messages: {
+                new_badge: "The badge reader didn't get a valid scan. Please clear the field and try again.",
+                escort_badge: "The badge reader didn't get a valid scan. Please press 'Clear Badges' and try again."
+            }
+        });
+
+        var firstName0 = $('#first_name_0');
+        var middleName0 = $('#middle_name_0');
+        var lastName0 = $('#last_name_0');
+        var dob0 = $('#dob_0');
+
+        function checkClearVisibility() {
+            /* Enable'Clear All Button' if any input exists on step 1 otherwise disable it */
+            if(firstName0.val().length > 0 || middleName0.val().length > 0 || 
+                lastName0.val().length > 0 || dob0.val().length > 0) {
+                $('#clear_1').attr("disabled", false);
+            }
+            else { $('#clear_1').attr("disabled", true); }
+        }
+
+        function checkStep1Instructions(){
+            if(manual_entry) {
+                $('#step_1_instruction_img').attr("src", type_url);
+                $('#step_1_instruction_text').text("Please type in the applicant's information from their government issued ID.");
+            }
+            else {
+                $('#step_1_instruction_img').attr("src", swipe_url);
+                $('#step_1_instruction_text').text("Please swipe the government issued ID on the device mounted to your monitor.");
+            }
+        }
+
+        function checkStep3Instructions() {
+            if(badgeType == "Limited") {
+                $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-ld-photo.png' %}");
+                $('#step_3_instruction_text').text("Please tap the new Limited Duration Badge on the badge reader.");
+            }
+            else if (badgeType == "Standard") {
+                $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-std-photo.png' %}");
+                $('#step_3_instruction_text').text("Please tap the new Standard Badge on the badge reader.");
+            }
+        }
+
+        function checkInputValidity() {
+            /* Only attempt to validate if inputs > 0 to prevent error msg */
+            if(firstName0.val().length > 0 && lastName0.val().length > 0 && dob0.val().length > 0) {
+                if(firstName0.valid() && lastName0.valid() && dob0.valid()) {
+                    $('#step_1_instruction_img').attr("src", step1_success_url);
+                    $('#step_1_instruction_text').text("Please verify the captured information is correct. Then click 'Check Records'.");
+                }
+                else {
+                    checkStep1Instructions()
+                }
+            }
+        }
+
+        firstName0.focus();
+
+        /* Format first, middle, and last name to be title case */
+        firstName0.on('input keyup change', function() {
+            checkClearVisibility();
+            checkInputValidity();
+            $(this).val(toTitleCase($(this).val()));
+            if( $('#last_name_0').val() == middleName0.val() ) {
+                $('#middle_name_0').val("");
+            }
+        });
+
+        /* Lock the field if it has any value and has been defocused */
+        firstName0.on('blur', function() {
+            /* Prevent going to the next field if the first field was not entered */
+            if (firstName0.val().length <= 0 && !manual_entry) {
+                firstName0.focus();
+                return true;
+            }
+            else if(firstName0.val().length > 0 && !manual_entry) { firstName0.prop("readonly", true); }
+        });
+        middleName0.on('blur', function() {
+            if(middleName0.val().length > 0 && !manual_entry) { middleName0.prop("readonly", true); }
+            if(middleName0.val() == lastName0.val() && !manual_entry) {$('#middle_name_0').val("").attr("placeholder", "");}
+        });
+        lastName0.on('blur', function() {
+            if(lastName0.val().length > 0 && !manual_entry) { lastName0.prop("readonly", true); }
+            if(lastName0.val() == middleName0.val() && !manual_entry) {$('#middle_name_0').val("").attr("placeholder", "");}
+        });
+        dob0.on('blur', function() { if(dob0.val().length > 0 && !manual_entry) { dob0.prop("readonly", true); } });
+
+        /* Validate middle and last name are not the same */
+        lastName0.on('input keyup change', function() {
+            checkClearVisibility();
+            checkInputValidity();
+            $(this).val(toTitleCase($(this).val()));
+        });
+
+        /* Validate middle and last name are not the same */
+        middleName0.on('input keyup change', function() {
+            checkClearVisibility();
+            checkInputValidity();
+            $(this).val(toTitleCase($(this).val()));
+        });
+
+        /* Determine whether to show clear button if only date is entered */
+        dob0.on('input keyup change', function() {
+            checkClearVisibility();
+            if($(this).val().length == 10) checkInputValidity();
+        });
+
+       
+        /* Validate new badge is in correct format when it hits the character limit */
+        $('#new_badge').on('input', function() {
+
+            /* Force upper case alphabetical CSN characters */
+            $(this).val(($(this).val().toUpperCase()));
+
+            if ($(this).val().length == 16 && $(this).valid() ) validateTemporary();
+
+            /* Hide the validation message if there isn't 16 characters */
+            else {
+                $("#escort_badge").val("").prop("readonly", true).blur("");
+                $("#new_status").hide();
+                $("#escort_status").hide();
+                $("#new_badge").focus();
+                if(badgeType == "Limited") {
+                    $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-ld-photo.png' %}");
+                    $('#step_3_instruction_text').text("Please tap the new Limited Duration Badge on the badge reader.");
+                }
+                else {
+                    $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-std-photo.png' %}");
+                    $('#step_3_instruction_text').text("Please tap the new Standard Badge on the badge reader.");
+                }
+            }
+        });
+
+        /* Validate escort badge is in correct format when it hits the character limit */
+        $('#escort_badge').on('input', function() {
+
+            /* Force upper case alphabetical CSN characters */
+            $(this).val(($(this).val().toUpperCase()));
+
+            if ($(this).val().length == 16 && $(this).valid() ) {
+                var escort_badge_csn = $(this).val();
+                var escortPriv = "Invalid";
+
+                /* Make sure the user did not tap the same badge twice */
+                if(badgeType == "Limited" && $('#escort_badge').val() == $('#new_badge').val()) {
+                    $("#snek-icon").attr("src", error_url );
+                    $("#loading-msg").text("Error: You already tapped this badge. Please click 'Clear Badges' and try again.");
+                    $("#loading-msg-name").text("");
+                    $("#loading-msg-status").text("");
+                    $("#loading-msg-escort").text("");
+                    $("#escort_status").show();
+                    $("#override_escort_result").hide();
+                    escort_validation = false;
+                }
+
+                /* Otherwise validate the escort badge */
+                else {
+                    /* Show the loading notification */
+                    $("#snek-icon").attr("src", snek_url );
+                    $("#loading-msg").text("Validating escort badge...");
+                    $("#escort_status").show();
+                    $("#override_escort_result").hide();
+                    $(this).blur();
+
+                    /* Make the validate escort API call */
+                    $.ajax({
+                        url: "{% url 'badge_issue' %}?action=validate_escort",
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {csn: escort_badge_csn},
+                        success: function(result){
+
+                            /* Case: Call is successful but badge doesn't exist (cannot override not found badge) */
+                            if(result.status == 404) {
+                                $("#snek-icon").attr("src", error_url );
+                                $("#loading-msg").text("Error: Escort badge not found. Please try again or use a new authorized escort.");
+                                $("#loading-msg-name").text("");
+                                $("#loading-msg-status").text("");
+                                $("#loading-msg-escort").text("");
+                                escort_validation = false;
+                            }
+                            else if(result.data.upid == null) {
+                                $("#snek-icon").attr("src", error_url );
+                                $("#loading-msg").text("Error: Invalid Escort Badge. Please try again with a valid escort badge.");
+                                $("#loading-msg-name").text("");
+                                $("#loading-msg-status").text("");
+                                $("#loading-msg-escort").text("");
+                                escort_validation = false;
+                            }
+                            else if(result.data.upid == '0') {
+                                $("#snek-icon").attr("src", error_url );
+                                $("#loading-msg").text("Error: Invalid Escort Badge. Please try again with a valid escort badge.");
+                                $("#loading-msg-name").text("");
+                                $("#loading-msg-status").text("");
+                                $("#loading-msg-escort").text("");
+                                escort_validation = false;
+                            }
+                            /* Case: Call is successful and badge is found */
+                            else if (result.status == 200) {
+                                escortUpid = result.data.upid;
+                                if(result.data.escort_privilege == 1) escortPriv = "Yes";
+                                else escortPriv = "No";
+                                if((result.data.escort_status == 'Active' || result.data.escort_status == 'Rebadge' || result.data.escort_status == 'Renew') && (result.data.escort_privilege == 1)) {
+                                    $("#snek-icon").attr("src", success_url );
+                                    $("#loading-msg").text("Name: "+result.data.first_name+" "+result.data.last_name+" | Badge Status: "+result.data.escort_status + " | Escort Privilege: "+escortPriv).css('color', 'black');
+                                    $("#loading-msg-name").text("");
+                                    $("#loading-msg-status").text("");
+                                    $("#loading-msg-escort").text("");
+                                    $('#step_3_instruction_img').attr('src', step3_success_ld_url);
+                                    $('#step_3_instruction_text').text("Badges Accepted. Please click 'Issue Badge' to complete the issuance.");
+                                    $("#escort_badge").prop("readonly", true).blur("");
+                                    escort_validation = true;
+                                }
+                                else {
+                                    $("#snek-icon").attr("src", error_url );
+                                    $("#loading-msg").text("");
+                                    $("#loading-msg-name").text("Name: "+result.data.first_name+" "+result.data.last_name).css('color', 'black');
+
+                                    /* Show why the badge is invalid */
+                                    if(result.data.escort_privilege == 0 && (result.data.escort_status == 'Active' || result.data.escort_status == 'Rebadge' || result.data.escort_status == 'Renew') ) {
+                                        $("#loading-msg-escort").text("| Escort Privilege: "+escortPriv+" |").css('color', 'red');
+                                        $("#loading-msg-status").text("| Badge: "+result.data.escort_status).css('color', 'black');
+                                    }
+                                    else if(result.data.escort_privilege == 1 && (result.data.escort_status != 'Active' && result.data.escort_status != 'Rebadge' && result.data.escort_status != 'Renew') )  {
+                                        $("#loading-msg-status").text("| Badge: "+result.data.escort_status+" |").css('color', 'red');
+                                        $("#loading-msg-escort").text("Escort: "+escortPriv+" |").css('color', 'black');
+                                    }
+                                    else {
+                                        $("#loading-msg-status").text("| Badge: "+result.data.escort_status).css('color', 'red');
+                                        $("#loading-msg-escort").text("| Escort: "+escortPriv+" |").css('color', 'red');
+                                    }
+                                    escort_validation = false;
+
+                                    /* Admins can override invalid escort badges */
+                                    if('{{request.session.role}}'.localeCompare('Admin') == 0) {
+                                        $("#override_escort_result").show();
+                                    }
+                                }
+                            }
+                            /* Case: Call is successful but server returns some other error */
+                            else {
+                                $("#snek-icon").attr("src", warning_url );
+                                $("#loading-msg").text("The system failed to validate this escort badge. Please try again.");
+                                $("#loading-msg-name").text("");
+                                $("#loading-msg-status").text("");
+                                $("#loading-msg-escort").text("");
+                                escort_validation = false;
+                            }
+                            return true;
+                        },
+                        error: function() {
+                            $("#snek-icon").attr("src", warning_url );
+                            $("#loading-msg").text("The server failed to validate this escort badge. Please try again.");
+                            $("#loading-msg-name").text("");
+                            $("#loading-msg-status").text("");
+                            $("#loading-msg-escort").text("");
+                            escort_validation = false;
+                            return true;
+                        }
+                    });
+                }
+
+            }
+            /* Hide the validation message if there isn't 16 characters */
+            else {
+                $("#escort_status").hide();
+                $("#loading-msg-name").text("");
+                $("#loading-msg-status").text("");
+                $("#loading-msg-escort").text("");
+            }
+        });
+
+        /* Set functionality of buttons when the page loads */
+        $('a[href="#next"]').parent().before("<li> <a id = 'cancel_btn' style = 'background-color: #BE1E2D; cursor: pointer' >Cancel</a> </li>");
+        $('#cancel_btn').click( function() { cancelConfirm();});
+        $('#clear_1').click(function() { clearStep1()});
+        $('#clear_1').attr("disabled", true);
+        $('#manual_1').click(function() { unlockStep1()});
+        $('#clear_3').click(function() { clearStep3()});
+        $('#clear_3').attr("disabled", true);
+        $("#override_escort_result").click( function() { overrideEscortStatus(); });
+        $('a[href="#previous"]').hide();
+
+        // Ajax Calls //
+        var createRequest = function(){
+
+            var request_status_code;
+            disableNext();
+
+            /* Show loading UI and disable next button */
+            $('#request_image').attr("src", '{% static 'tbadge_portal/img/loading-icons/request.gif' %}');
+            $('#no_fly_1').val('Checking Records ...').css("background-color", "#CCCCCC").css("color", "#555555");
+            $('#adjudication_1').val('Checking Records ...').css("background-color", "#CCCCCC").css("color", "#555555");
+            $('#issuance_limit_1').val('Checking Records ...').css("background-color", "#CCCCCC").css("color", "#555555");
+            $('#request_status').html("<img src='{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}'> Verifying Applicant Records ...");
+            $('#request_reason').text("");
+            $('#request_instructions').text("");
+            $('#retry_request').remove();
+
+
+            $.ajax({
+                url: "{% url 'badge_issue' %}?action=create_request",
+                type: 'POST',
+                dataType: 'json',
+                data: { action: "create_request",
+                        csrfmiddlewaretoken: '{{csrf_token}}',
+                        first_name: $('#first_name_0').val().trim(),
+                        middle_name: $('#middle_name_0').val().trim(),
+                        last_name: $('#last_name_0').val().trim(),
+                        dob: $('#dob_0').val(),
+                        operator_fullname: "{{request.session.first_name|title}} {{request.session.last_name|title}}",
+                        badge_type: badgeType
+                },
+                success: function(result){
+                    if(result.status == 200) {
+
+                        /* Store the values in shorter variable names */
+                        requestId = result.data.requests[0].request_id;
+                        applicantId = result.data.applicant_id;
+                        noflyStatus = result.data.status.nofly;
+                        adjudicationStatus = result.data.status.adjudication;
+                        issuanceStatus = (result.data.status.issuance_count < 4);
+
+                        /* Determine Status UI */
+                        if(noflyStatus) { $('#no_fly_1').val('PASSED').css("background-color", "#39B54A");  }
+                        else { $('#no_fly_1').val('FAILED').css("background-color", "#BE1E2D"); }
+                        if(adjudicationStatus) { $('#adjudication_1').val('PASSED').css("background-color", "#39B54A");  }
+                        else { $('#adjudication_1').val('FAILED').css("background-color", "#BE1E2D"); }
+                        if(issuanceStatus) { $('#issuance_limit_1').val('PASSED').css("background-color", "#39B54A"); }
+                        else {  $('#issuance_limit_1').val('FAILED').css("background-color", "#BE1E2D"); }
+
+                        /* Case: Applicant Cleared */
+                        if(noflyStatus && adjudicationStatus && issuanceStatus && result.status_id != 1 && result.status_id != 3) {
+                            request_status_code = "cleared";
+                        }
+
+                        /* Case: Applicant has an outstanding (issued) badge */
+                        else if(result.status_id == 1 || result.status_id == 3) {
+                            $('#request_reason').text("This applicant has an outstanding badge");
+                            $('#request_instructions').text("Please return their badge before issuing a new one.");
+                            var return_url = '{% url 'applicant_view' "replaceMe" %}';
+                            return_url = return_url.replace('replaceMe', intToHashid(applicantId));
+                            $('#instructions').append("<a id = 'go_profile' class = 'btn btn-xlg btn-primary' style='margin-top:25px; font-size: 1.2em'>Go to Profile</a>");
+                            $('#go_profile').click( function() { goToProfile(return_url)});
+                            request_status_code = "denied";
+                        }
+
+                        /* Case: Applicant is on No-Fly or Adjudication */
+                        else if(noflyStatus == false || adjudicationStatus == false) {
+                            $('#request_instructions').text("Click 'Home' to return.");
+                            $('#instructions').append("<a id = 'go_home' class = 'btn btn-xlg btn-primary' style='margin-top:25px; font-size: 1.2em' >Home</a>");
+                            $('#go_home').click( function() { goHome()});
+                            request_status_code = "denied";
+                        }
+
+                        /* Case: Applicant hit issuance limit but is otherwise cleared */
+                        else if(issuanceStatus == false) {
+                            $('#request_instructions').text("Click 'Home' to return.");
+                            if('{{request.session.role}}'.localeCompare('Admin') == 0) {
+                                $('#instructions').append("<a id = 'override_btn' class = 'btn btn-xlg btn-primary' style='margin-top:25px; margin-right:25px; background-color: #BE1E2D; font-size: 1.2em'>Override</a>");
+                                $('#override_btn').click( function() { overrideStep();});
+                            }
+                            $('#instructions').append("<a id = 'go_home' class = 'btn btn-xlg btn-primary' style='margin-top:25px; font-size: 1.2em'>Home</a>");
+                            $('#go_home').click( function() { goHome()});
+                            request_status_code = "denied";
+                        }
+                    }
+
+                    /* Case: Django returned a status code other than 200 */
+                    else {
+                        $('#request_status').text("System Error");
+                        $('#request_reason').text("The system ran into an issue when validating this request.");
+                        request_status_code = "error";
+                    }
+                },
+                error: function() {
+                    $('#request_status').text("Server Error");
+                    $('#request_reason').text("The server ran into an issue when creating this request.");
+                    request_status_code = "error";
+                },
+                complete: function() {
+                    var $noFly1 = $('#no_fly_1');
+                    var $adjudication1 = $('#adjudication_1');
+                    var $issuanceLimit1 = $('#issuance_limit_1');
+                    var $next = $('a[href="#next"]');
+                    var $requestImg = $('#request_image');
+                    var $requestStatus = $('#request_status');
+                    var $requestInstructions = $('#request_instructions');
+                    var $cancelBtn = $('#cancel_btn');
+
+                    $noFly1.css("color", "#FFFFFF");
+                    $adjudication1.css("color", "#FFFFFF");
+                    $issuanceLimit1.css("color", "#FFFFFF");
+                    enableNext();
+                    $next.focus();
+                    /* Determine the instructions based on the request status */
+                    switch(request_status_code){
+                        case "cleared":
+                            $requestImg.attr("src", '{% static 'tbadge_portal/img/status-icons/cleared-icon.png' %}');
+                            $requestStatus.text("Applicant Cleared");
+                            $requestInstructions.text("Click 'Proceed' to continue.");
+                            $next.show();
+                            $cancelBtn.show();
+                            request_validation = true;
+                            break;
+                        case "denied":
+                            $requestImg.attr("src", '{% static 'tbadge_portal/img/status-icons/denied-icon.png' %}');
+                            $requestStatus.text("Applicant Denied");
+                            $next.hide();
+                            request_validation = false;
+                            $cancelBtn.hide();
+                            break;
+                        default:
+                            $noFly1.val('ERROR').css("background-color", "#FFA500");
+                            $adjudication1.val('ERROR').css("background-color", "#FFA500");
+                            $issuanceLimit1.val('ERROR').css("background-color", "#FFA500");
+                            $requestImg.attr("src", '{% static 'tbadge_portal/img/status-icons/warning-icon.png' %}');
+                            $requestInstructions.text("Please click 'Retry' to retry this request.");
+                            $('#instructions').append("<a id = 'retry_request' class = 'btn btn-xlg btn-primary' style='margin-top:25px; font-size: 1.2em'>Retry</a>");
+                            $('#retry_request').click( function() { createRequest()});
+                            $next.hide();
+                            request_validation = false;
+                            $cancelBtn.show();
+                    }
+
+                    if(badgeType == "Limited") {
+                            $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-ld-photo.png' %}");
+                            $('#step_3_instruction_text').text("Please tap the new Limited Duration Badge on the badge reader.");
+                    }
+                    else {
+                            $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-std-photo.png' %}");
+                            $('#step_3_instruction_text').text("Please tap the new Standard Badge on the badge reader.");
+                    }
+                }
+            });
+        };
+
+        var createIssuance = function() {
+
+            /* Set the loading UI */
+            if(badgeType == "Limited") $('#issued_img').attr('src', "{% static 'tbadge_portal/img/loading-icons/ld-issue-animation.gif' %}").attr('width', 180).attr('height', 290);
+            else $('#issued_img').attr('src', "{% static 'tbadge_portal/img/loading-icons/std-issue-animation.gif' %}").attr('width', 180).attr('height', 290);
+            $("#finish_section").css("margin-top", 100);
+            $('#issue_result').html("<img src='{% static 'tbadge_portal/img/loading-icons/medium-snek.gif' %}'> Processing Badge Issuance ...");
+            $('#issued_to_result').text("");
+            $('#retry_issue').remove();
+            $('#home_issue').remove();
+
+            $.ajax({
+                url: "{% url 'badge_issue' %}?action=complete_issue",
+                type: 'POST',
+                dataType: 'json',
+                data: { action: "complete_issue",
+                        csrfmiddlewaretoken: '{{csrf_token}}',
+                        csn: $('#new_badge').val(),
+                        applicant_id: applicantId,
+                        request_id: requestId,
+                        badge_type: badgeType,
+                        escort_badge_csn: $('#escort_badge').val(),
+                        issued_by: "{{request.session.first_name|title}} {{request.session.last_name|title}}",
+                        override: override_validation,
+                        escort_upid: escortUpid
+
+                },
+                success: function(result){
+                    if(result.status == 204 || result.status == 200) {
+                        var today = moment();
+                        var due;
+                        var fullname = $('#first_name_0').val() + " " + $('#last_name_0').val();
+                        setInterval(countDown, 1000);
+
+                        if(badgeType == "Limited") {
+                            $('#issued_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/badge-limited-duration-img.png' %}")
+                                            .attr('width', 180).attr('height', 290);
+                            $('#issued_to_result').text("24 Hour Limited Duration Badge issued to '" + fullname +"'.");
+                            due = today.add(1, "days");
+                        }
+                        else {
+                            $('#issued_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/badge-standard-img.png' %}")
+                                            .attr('width', 180).attr('height', 290);
+                            $('#issued_to_result').text("30 Day Standard Badge issued to '" + fullname + "'.");
+                            due = today.add(30, "days");
+                        }
+
+                        $('#issue_result').text("Success!").css("color", "#39B54A");
+                        $('#due_date_id').text("Due on: "+ moment(due).format('MMMM Do YYYY, h:mm a'));
+
+                        $('#redirect_directions').text("(This page will redirect to the home page in "+n+" seconds)");
+                        $("#finish_section").css("margin-top", 0)
+                                            .append("<a id = 'issue_another' class = 'btn btn-xlg btn-primary' style='margin-top:10px; margin-right:20px; font-size: 1.2em'>Issue Another Badge</a>")
+                                            .append("<a id = 'go_home_4' class = 'btn btn-xlg btn-primary' style='margin-top:10px; font-size: 1.2em'>Home</a>");
+                        $('#issue_another').click( function() { reissueBadge()});
+                        $('#go_home_4').click( function() { goHome()}).focus();
+                        $('#cancel_btn').hide();
+                    }
+                    else {
+                        $('#issued_img').attr('src', "{% static 'tbadge_portal/img/status-icons/warning-icon.png' %}");
+                        $('#issue_result').text("System Error");
+                        $('#issued_to_result').text("The system ran into an issue when validating this issuance. Click 'Retry' to retry this issuance.");
+                        $("#finish_section").css("margin-top", 0)
+                                        .append("<a id = 'retry_issue' class = 'btn btn-xlg btn-primary' style='margin-top:10px; margin-right: 20px; font-size: 1.2em'>Retry</a>")
+                                        .append("<a id = 'home_issue' class = 'btn btn-xlg btn-primary' style='margin-top:10px; font-size: 1.2em'>Home</a>");
+                        $('#retry_issue').click( function() { createIssuance()});
+                        $('#home_issue').click( function() { goHome()}).focus();
+                        $('#cancel_btn').show();
+                    }
+                },
+                error: function() {
+                    $('#issued_img').attr('src', "{% static 'tbadge_portal/img/status-icons/warning-icon.png' %}");
+                    $('#issue_result').text("Server Error");
+                    $('#issued_to_result').text("The server ran into an issue when issuing this badge. Click 'Retry' to retry this issuance.");
+                    $("#finish_section").css("margin-top", 0)
+                                        .append("<a id = 'retry_issue' class = 'btn btn-xlg btn-primary' style='margin-top:10px; margin-right: 20px; font-size: 1.2em'>Retry</a>")
+                                        .append("<a id = 'home_issue' class = 'btn btn-xlg btn-primary' style='margin-top:10px; font-size: 1.2em'>Home</a>");
+                    $('#retry_issue').click( function() { createIssuance()});
+                    $('#home_issue').click( function() { goHome()}).focus();
+                    $('#cancel_btn').show();
+                }
+            });
+        };
+
+        var validateTemporary = function () {
+            var new_badge_csn = $('#new_badge').val();
+            var new_status;
+
+            /* Show the loading notification */
+            $("#snek-icon-2").attr("src", snek_url );
+            $("#loading-msg-2").text("Validating temporary badge...");
+            $("#new_status").show();
+
+            /* Make the validate temporary API call */
+            $.ajax({
+                url: "{% url 'badge_issue' %}?action=validate_temporary",
+                type: 'GET',
+                dataType: 'json',
+                data: {csn: new_badge_csn},
+                success: function(result) {
+                    if (result.status_id == 2 || result.status_id == 4) {
+                        $("#snek-icon-2").attr("src", success_url );
+                        $("#loading-msg-2").text("This badge can be issued.").css('color', 'black');
+                        $("#escort_badge").prop('readonly', false).focus();
+                        if(badgeType == "Limited") {
+                            $('#step_3_instruction_img').attr('src', "{% static 'tbadge_portal/img/badge-icons/tap-escort-photo.png' %}");
+                            $('#step_3_instruction_text').text("Please tap the escort badge on the badge reader.");
+                        }
+                        else if (badgeType == "Standard") {
+                            $('#step_3_instruction_img').attr('src', step3_success_std_url);
+                            $('#step_3_instruction_text').text("Badge Accepted. Please click 'Issue Badge' to complete the issuance.");
+                        }
+                        $("#new_badge").blur().prop("readonly", true);
+                        temporary_validation = true;
+
+                    }
+                    else if (result.status_id == 1) {
+                        $("#snek-icon-2").attr("src", error_url );
+                        $("#loading-msg-2").text("This badge has not been processed as returned.")
+                                           .append("<span> <a id = 'retry_temp_valid' style = 'cursor: pointer'> Click here to return this badge. </a> </span>").css('color', 'red');
+                        $("#retry_temp_valid").click( function() { returnBadge(new_badge_csn); });
+                        temporary_validation = false;
+                    }
+                    else if (result.status_id == 3) {
+                        $("#snek-icon-2").attr("src", error_url );
+                        $("#loading-msg-2").text("This badge has not been processed as returned and is overdue.")
+                                           .append("<span> <a id = 'retry_temp_valid' style = 'cursor: pointer'> Click here to return this badge. </a> </span>").css('color', 'red');
+                        $("#retry_temp_valid").click( function() { returnBadge(new_badge_csn); });
+                        temporary_validation = false;
+                    }
+                    else if (result.status_id == 5) {
+                        if(badgeType == "Limited") {
+                            $("#snek-icon-2").attr("src", error_url);
+                            $("#loading-msg-2").text("You tapped an escort badge. Please click 'Clear Badges' and retry with the Limited Duration badge.").css('color', 'black');
+                        }
+                        else {
+                            $("#snek-icon-2").attr("src", error_url);
+                            $("#loading-msg-2").text("You tapped an escort badge. Please click 'Clear Badge' and retry with the Standard badge.").css('color', 'black');
+                        }
+
+                    }
+                    else {
+                        $("#snek-icon-2").attr("src", warning_url );
+                        $("#loading-msg-2").text("This badge was found but its status could not be validated. Please try again or use another badge.").css('color', 'black');
+                        temporary_validation = false;
+                    }
+                    return true;
+                },
+                error: function() {
+                    $("#snek-icon-2").attr("src", warning_url );
+                    $("#loading-msg-2").text("This badge could not be validated. Please try again or use another badge.").css('color', 'black');
+                    temporary_validation = false;
+                    return true;
+                },
+                complete: function() {
+                    $("#clear_3").attr('disabled', false);
+                }
+            });
+        }
+
+    });
+
+    /* When all libraries, images load, hide loading animation, show issuance steps, and focus first input */
+    window.onload = function() {
+        $('#loading-issuance').hide();
+        $('#issue-badge').show();
+        $('#first_name_0').focus();
+    };
+    </script>
+{% endblock %}

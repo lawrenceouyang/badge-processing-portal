@@ -1,0 +1,77 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Escort History - </title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Escort History: <span id="name-field"></span></h1>
+        <h4>UPID: <span id="escort-id"></span></h4>
+        <h4>Proximity ID: <span id="prox-id"></span></h4>
+        <h4>CSN: <span id="escort-csn"></span></h4>
+        <hr class="header-line">
+    </div>
+    <table id="escorts" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+        <thead>
+            <tr>
+                <th>Escorted On</th>
+                <th>Escorted Applicant</th>
+                <th>Temporary Badge CSN</th>
+            </tr>
+        </thead>
+    </table>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+        var escortData = JSON.parse('{{ escort_data | safe | escapejs }}').data;
+        if (escortData.middle_name != null) {
+            $(this).attr("title", "Escort History - " + escortData.first_name + " " + escortData.middle_name + " " + escortData.last_name);
+            $('#name-field').text(escortData.first_name + " " + escortData.middle_name + " " + escortData.last_name);
+        }
+        else {
+            $(this).attr("title", "Escort History: " + escortData.first_name + " " + escortData.last_name);
+            $('#name-field').text(escortData.first_name + " " + escortData.last_name);
+        }
+        $('#escort-id').text(escortData.upid);
+        $('#prox-id').text(escortData.prox_id);
+        $('#escort-csn').text(escortData.csn);
+        $('#escorts').DataTable({
+            "bSort": false,
+            "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+            "data": escortData.issuedBadges,
+            "responsive": true,
+            "language": {
+                    "emptyTable": "No temporary badges have been issued under this escort badge."
+                    },
+            "columns": [
+                { "data": "issued_on"},
+                { "data": function(data) {
+                    var url = "{% url 'applicant_view' 'appIDPlaceholder' %}".replace('appIDPlaceholder', intToHashid(data.applicant_id));
+                    if (data.applicant_middle_name != null)
+                        return "<a href='"+ url + "'>" + data.applicant_first_name + " " + data.applicant_middle_name + " " + data.applicant_last_name + "</a>";
+                    return "<a href='"+ url + "'>" + data.applicant_first_name + " " + data.applicant_last_name + "</a>";
+                    }
+                },
+                { "data": function(data) {
+                    var url = "{% url 'badge_view' 'csnPlaceholder' %}".replace('csnPlaceholder', data.badge_csn);
+                    return "<a href='" + url + "'>" + data.badge_csn + "</a>";
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+{% endblock %}

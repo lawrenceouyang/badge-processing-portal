@@ -1,0 +1,116 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Badge {{ badge_id }} Issuance History</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Badge Issuance History</h1>
+        <h4>Badge CSN: {{ badge_id }}</h4>
+        <h4>Badge Type: <span id="badge-type"></span></h4>
+        <hr class="header-line">
+    </div>
+    <table id="badge_history" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+            <thead>
+                <tr>
+                    <th>Issued To</th>
+                    <th>Issued On</th>
+                    <th>Escorted By</th>
+                    <th>Status</th>
+                    <th>Issued By</th>
+                    <th>Returned On</th>
+                    <th>Returned To</th>
+                </tr>
+            </thead>
+        </table>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+            badge_data = JSON.parse('{{ badge_data | safe | escapejs }}').data;
+            $('#badge-type').text(badge_data[0].badge_type);
+            $('#badge_history').DataTable({
+                "bSort": false,
+                "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+                "data": badge_data,
+                "columns": [
+                    { "data": function(data){
+                        {% if request.session.role == 'Admin' %}
+                            var url = "{% url 'applicant_view' 'appIDPlaceholder' %}".replace('appIDPlaceholder', intToHashid(data.issuedTo.applicant_id));
+                            if (data.issuedTo.middle_name != null)
+                                return "<a href=" + url + ">" + data.issuedTo.first_name + " " + data.issuedTo.middle_name + " " + data.issuedTo.last_name + "</a>";
+                            else
+                                return "<a href=" + url + ">" + data.issuedTo.first_name + " " + data.issuedTo.last_name + "</a>";
+                        {% else %}
+                            if (data.issuedTo.middle_name != null)
+                                return data.issuedTo.first_name + " " + data.issuedTo.middle_name + " " + data.issuedTo.last_name;
+                            else
+                                return data.issuedTo.first_name + " " + data.issuedTo.last_name;
+                        {% endif %}
+                        }
+                    },
+                    { "data": "issued_on"},
+                    { "data": function(data) {
+                        if (data.escort != null) {
+                            {% if request.session.role == 'Admin' %}
+                                url = "{% url 'badge_escort_csn_to_upid' %}?csn=" + data.escort.csn;
+                                if (data.escort.first_name == null && data.escort.last_name == null)
+                                    return "(Not On File)";
+                                else if (data.escort.middle_name != null)
+                                    return "<a href=" + url + ">" + data.escort.first_name + " " + data.escort.middle_name + " " + data.escort.last_name + "</a>";
+                                else
+                                    return "<a href=" + url + ">" + data.escort.first_name + " " + data.escort.last_name + "</a>";
+                            {% else %}
+                                if (data.escort.first_name == null && data.escort.last_name == null)
+                                    return "(Not On File)";
+                                else if (data.escort.middle_name != null)
+                                    return data.escort.first_name + " " + data.escort.middle_name + " " + data.escort.last_name;
+                                else
+                                    return data.escort.first_name + " " + data.escort.last_name;
+                            {% endif %}
+                        }
+                        else if (data.escort_csn != null)
+                            return "(Not On File)";
+                        else
+                            return "Not Applicable";
+                    }},
+                    { "data": function(data) {
+                        if (data.badge_status.status_id == 1) {
+                            if (moment() > moment(data.due_on, "MM/DD/YYYY hh:mm a"))
+                                return "<label class='label label-danger'>Overdue</label>";
+                            else
+                                return "<label class='label label-primary'>Issued</label>";
+                        }
+                        else return "<label class='label label-success'>Returned</label>";
+                        }
+                    },
+                    { "data": "issued_by"},
+                    { "data": function(data) {
+                        if (data.returned_on == null)
+                            return "<span style='color:indianred'>Not Returned</span>";
+                        return data.returned_on;
+                        }
+                    },
+                    { "data": function(data) {
+                        if (data.returned_to == null)
+                            return "<span style='color:indianred'>Not Returned</span>";
+                        return data.returned_to;
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+{% endblock %}

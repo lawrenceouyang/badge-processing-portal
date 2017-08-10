@@ -1,0 +1,21 @@
+{% load staticfiles %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert-message alert alert-{{ message.tags }} alert-dismissible center" role="alert">
+            <button type="button" id="message-close" class="close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            {% if message.tags == 'success' %}
+                 <span class="glyphicon glyphicon-ok-sign"></span>
+            {% elif message.tags == 'info' %}
+                <span class="glyphicon glyphicon-info-sign"></span>
+            {% elif message.tags == 'warning' %}
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+            {% elif message.extra_tags == 'danger' %}
+                <span class="glyphicon glyphicon-remove-sign"></span>
+            {% endif %}
+            {{ message}}
+        </div>
+    {% endfor %}
+{% endif %}

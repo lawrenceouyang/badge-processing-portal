@@ -1,0 +1,168 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Badge - Lookup</title>
+{% endblock %}
+
+{% block container %}
+     <div class="vertical-center">
+        <h1 class="center">Badge Lookup</h1>
+        <br>
+        <form id="search-form" action="{% url 'badge_results' %}" method="post" autocomplete="off">
+            {% csrf_token %}
+
+            {% if request.session.role == 'Admin' %}
+                <!-- Admins have access to multiple search parameters -->
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <div class="input-group add-on">
+                            <div class="input-group-btn search-panel-type">
+                                <button type="button" class="btn dropdown-toggle btn-search" data-toggle="dropdown">
+                                    <span id="search-concept">Temporary Badge CSN</span> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" id="search-dropdown">
+                                    <li><a id="temp-csn-btn">Temporary Badge CSN</a></li>
+                                    <li><a id="escort-csn-btn">Escort Badge CSN</a></li>
+                                    <li><a id="escort-upid-btn">Escort Badge UPID</a></li>
+                                </ul>
+                            </div>
+                            <input id="badge-query" type="text" class="form-control"
+                                   name="badge_query" placeholder="Tap temporary badge ..."
+                                   title="Badge Proximity ID" required/>
+                            <input id="search-type" type="hidden" value="temp_csn" required>
+                            <div class="input-group-btn search-panel-type">
+                                <button id="search-submit" type="submit" class="btn btn-search">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="center" id="error-show" style="display:none">
+                            <label class="error">Please enter a valid UPID.</label>
+                        </div>
+                    </div>
+                </div>
+
+            {% else %}
+
+            <!-- Users have access to only query temporary badges by csn -->
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div class="input-group add-on">
+                        <input id="badge-query" type="text" class="form-control"
+                               name="badge_query" placeholder="Tap temporary badge ..."
+                               title="Badge Proximity ID" required/>
+                        <input id="search-type" type="hidden" value="temp_csn" required>
+                        <div class="input-group-btn search-panel-type">
+                            <button id="search-submit" type="submit" class="btn btn-search">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endif %}
+
+        </form>
+        <br>
+         <div class="row center">
+             <a class="btn btn-primary btn-lg" href="{% url 'login' %}">Home</a>
+         </div>
+    </div>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+        $(function() {
+
+            var userRole = '{{ request.session.role|safe }}';
+
+            function valCheck() {
+                /* Force upper case alphabetical CSN characters */
+                $(this).val(($(this).val().toUpperCase()));
+
+                if ($(this).val().length == 16) {
+                    $('#search-form').submit();
+                }
+                if ($(this).val().length > 16) {
+                    $(this).val($(this).val().substring(0, 16));
+                    $('#search-form').submit();
+                }
+            }
+
+            function upidCheck() {
+                if ($(this).val().length > 10)
+                    $('#error-show').css("display", "block");
+                else
+                    $('#error-show').css("display", "none");
+            }
+
+            $badgeQuery = $('#badge-query');
+
+            $badgeQuery.focus()
+                    .on("blur", function() {
+                       $(this).focus();
+                    })
+                    .on("input", valCheck);
+
+            $('#search-list').addClass("active");
+            $searchType = $('#search-type');
+
+            $('#container').css("margin", 0);
+
+            $('#temp-csn-btn').on("click", function() {
+                $('#search-type').val("temp_csn");
+
+                $('#search-concept').text("Temporary Badge CSN");
+                $badgeQuery.attr("placeholder", "Tap temporary badge ...")
+                                 .on("input", valCheck)
+                                 .off("input", upidCheck)
+                                 .val("");
+                $('#error-show').css("display", "none");
+
+            });
+            $('#escort-csn-btn').on("click", function() {
+                $('#search-type').val("escort_csn");
+                $('#search-concept').text("Escort Badge CSN");
+                $badgeQuery.attr("placeholder", "Tap escort badge ...")
+                                 .on("input", valCheck)
+                                 .off("input", upidCheck)
+                                 .val("");
+                $('#error-show').css("display", "none");
+            });
+            $('#escort-upid-btn').on("click", function() {
+                $('#search-type').val("escort_upid");
+                $('#search-concept').text("Escort Badge UPID");
+                $badgeQuery.attr("placeholder", "Type the escort badge ID ...")
+                                 .on("input", upidCheck)
+                                 .off("input", valCheck)
+                                 .val("");
+                $('#error-show').css("display", "none");
+            });
+            $('#search-form').on("submit", function(e) {
+                $badgeQuery.on("input keyup keydown", function(e) {
+                    e.preventDefault();
+                });
+                switch($searchType.val()) {
+                    case "temp_csn":
+                        /* Users are redirected to a read-only badge view page if they search from Badge Lookup */
+                        if(userRole.localeCompare("User") == 0) {
+                            $(this).append("<input type='hidden' name='type' value='readonly' />");
+                        }
+                        $(this).attr("action", "{% url 'badge_return' %}?next={{ request.get_full_path }}");
+                        break;
+                    case "escort_csn":
+                        $(this).attr("action", "{% url 'badge_escort_results' %}?type=csn"); break;
+                    case "escort_upid":
+                        if ($badgeQuery.val().length > 10) {
+                            e.preventDefault();
+                        }
+                        $(this).attr("action", "{% url 'badge_escort_results' %}?type=upid");
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% comment %}{% endcomment %}

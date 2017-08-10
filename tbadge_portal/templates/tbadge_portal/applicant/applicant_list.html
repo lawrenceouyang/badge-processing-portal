@@ -1,0 +1,84 @@
+{% extends 'tbadge_portal/base.html' %}
+
+{% load staticfiles %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Applicant Search Results</title>
+{% endblock %}
+
+{% block container %}
+    <div class="header-group">
+        <h1 class="page-title">Applicants matching the name</h1>
+        <hr class="header-line">
+    </div>
+    <table id="applicants" cellspacing="0" width="100%" style= "margin-top: 20px; margin-bottom:20px">
+        <thead>
+            <tr>
+                <th>Applicant Name</th>
+                <th>Date of Birth</th>
+                <th>Operator Name</th>
+                <th>No Fly</th>
+                <th>Adjudications</th>
+                <th>Issuance Limit</th>
+            </tr>
+        </thead>
+    </table>
+{% endblock %}
+
+{% block javascripts-after %}
+    <script>
+    $(function() {
+        applicantsData = JSON.parse('{{ applicants | safe | escapejs }}');
+        $('.page-title').text("Applicants matching the name "+applicantsData.data[0].first_name+" "+applicantsData.data[0].last_name);
+        $('#applicants').DataTable({
+            "bSort": false,
+            "dom": "t<'col-sm-6'i><'col-sm-6'p>",
+            "data": applicantsData.data,
+            "responsive": true,
+            "columns": [
+                { "data" : function(data) {
+                    if (data.middleName == null)
+                            data.middleName = "";
+                    url = "{% url 'applicant_view' 'applicantIDPlaceholder' %}".replace('applicantIDPlaceholder', intToHashid(data.applicant_id));
+                    return "<a href=" + url + ">" + data.first_name + " " + data.middleName + " " + data.last_name + "</a>";
+                    }
+                },
+                { "data": "dob" },
+                { "data" : function(data) {
+                    return data.status.latest_operator_username;
+                    }
+                },
+                { "data": function(data) {
+                    if (data.status.nofly)
+                        return "<span class='label label-success'>PASS</span>";
+                    else
+                        return "<span class='label label-danger'>FAIL</span>";
+                    }
+                },
+                { "data": function(data) {
+                    if (data.status.adjudication)
+                        return "<span class='label label-success'>PASS</span>";
+                    else
+                        return "<span class='label label-danger'>FAIL</span>";
+                    }
+                },
+                { "data": function(data) {
+                    if (data.status.issuance_count < 5)
+                        return "<span class='label label-success'>PASS</span>";
+                    else
+                        return "<span class='label label-danger'>FAIL</span>";
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+{% endblock %}

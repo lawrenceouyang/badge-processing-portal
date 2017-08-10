@@ -1,0 +1,33 @@
+html{
+    position: relative;
+    min-height: 100%;
+}
+
+body{
+    background: #3f4043;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-bottom: 60px;
+}
+
+.vertical-center{
+    position:absolute;
+    top:50%;
+    width: 100%;
+    height: 200px;
+    margin-top: -250px;
+    padding: 30px;
+}
+
+#container {
+    margin: 0 auto !important;
+}
+
+.alert-message {
+    margin-top: 0 !important;
+}
+
+.footer {
+    background-color: transparent !important;
+}
+/***

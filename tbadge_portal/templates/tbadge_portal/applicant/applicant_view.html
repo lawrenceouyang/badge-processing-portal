@@ -1,0 +1,242 @@
+{% extends "tbadge_portal/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}
+    <title>Applicant Profile: </title>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'tbadge_portal/css/table.css' %}" />
+{% endblock %}
+
+{% block javascripts-before %}
+    <script src="{% static 'tbadge_portal/js/helpers.js' %}"></script>
+{% endblock %}
+
+{% block container %}
+<!-- Header and Link -->
+<div class="header-group">
+    <h1 class="page-title">Applicant Profile: </h1>
+    <hr class="header-line">
+</div>
+
+
+<!-- Form Beginning -->
+<form id="view-form" role="form" class="form-horizontal" action="" method="post" autocomplete="off">
+    {% csrf_token %}
+    <!-- First Name -->
+    <div class=form-group>
+        <label for="first_name" class="col-lg-2 col-lg-offset-2 control-label">First Name</label>
+        <div class="col-lg-4">
+            <input type="text" class="form-control center" id="first_name" name="first_name" maxlength="100" disabled>
+        </div>
+    </div>
+
+    <!-- Middle Name -->
+    <div class=form-group id="middle-name-form">
+        <label for="middle_name" class="col-lg-2 col-lg-offset-2 control-label">Middle Name</label>
+        <div class="col-lg-4">
+            <input type="text" class="form-control center" id="middle_name" name="middle_name" maxlength="100" disabled>
+        </div>
+    </div>
+
+    <!-- Last Name -->
+    <div class=form-group>
+        <label for="last_name" class="col-lg-2 col-lg-offset-2 control-label">Last Name</label>
+        <div class="col-lg-4">
+            <input type="text" class="form-control center" id="last_name" name="last_name" maxlength="100" disabled>
+        </div>
+    </div>
+
+    <!-- DOB -->
+    <div class=form-group>
+        <label for="dob" class="col-lg-2 col-lg-offset-2 control-label">Date of Birth</label>
+        <div class="col-lg-4">
+            <input type="text" class="form-control center" id="dob" name="dob" maxlength="100" disabled>
+        </div>
+    </div>
+
+    <div class="row center">
+        <label style="margin-top: 25px" class="col-lg-2 col-lg-offset-2 control-label">Issued Badges <br> (Last 12 Months)</label>
+    <!-- Limited Duration Badges Issued -->
+        <div class="col-lg-4">
+            <div class="col-lg-4">
+                <label for="ld-badges-issued" class="vertical-control-label control-label" style="display:inline-block">Limited Duration</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="ld-badges-issued" name="ld-badges-issued" maxlength="100" disabled>
+                </div>
+            </div>
+        <!-- Standard Badges Issued -->
+            <div class="col-lg-4">
+                <label for="std-badges-issued" class="vertical-control-label control-label">Standard</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="std-badges-issued" name="std-badges-issued" maxlength="100" disabled>
+                </div>
+            </div>
+
+        <!-- Total Badges Issued -->
+            <div class="col-lg-4">
+                <label for="totl-badges-issued" class="vertical-control-label control-label">Total</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="totl-badges-issued" name="totl_badges_issued" maxlength="100" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="override-footnote" style="display:none">
+        <div class="col-lg-4 col-lg-offset-4 right-justified">
+            <span><i>*Overridden Badges</i></span>
+        </div>
+    </div>
+    <br>
+    <div class="row center">
+    <label style="margin-top: 25px" class="col-lg-2 col-lg-offset-2 control-label">Most Recent Status <br> (Since Last Request)</label>
+    <!-- No Fly -->
+        <div class="col-lg-4">
+            <div class="col-lg-4">
+                <label for="no_fly" class="vertical-control-label control-label">No-Fly</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="no_fly" name="no_fly" maxlength="100" disabled>
+                </div>
+            </div>
+
+        <!-- Adjudications -->
+            <div class="col-lg-4">
+                <label for="adjudications" class="vertical-control-label control-label">Adjudications</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="adjudications" name="adjudications" maxlength="100" disabled>
+                </div>
+            </div>
+
+        <!-- Issuance Limit -->
+            <div class="col-lg-4">
+                <label for="issuance" class="vertical-control-label control-label">Issuance Limit</label>
+                <div class="col-lg-12">
+                    <input type="text" class="form-control center" id="issuance" name="issuance" maxlength="100" disabled>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- Notes -->
+    <div class=form-group>
+        <label for="notes" class="col-lg-2 col-lg-offset-2 control-label">Notes</label>
+        <div class="col-lg-4">
+                <textarea class="form-control" style="margin-bottom: 0; resize:none; height: auto;" id="notes" name="notes"
+                maxlength=500 rows="5" ></textarea>
+            <label id="notes-error" class="error" style="margin:3px; display:none">Please update the notes before attempting to submit.</label>
+            <div><i><span id="char-left">500 characters remaining</span> <span style="float:right; text-align:right">Last Updated By: <span id="updated-by"></span> on<br><span id="updated-time"></span></span></i></div>
+        </div>
+    </div>
+
+   <!-- Links -->
+    <div class="row right-justified">
+        <div class="col-lg-4 col-lg-offset-4" style=" margin-bottom: 75px; display:inline-block;">
+            <span class="label-spacing">
+                <a id="requests-link" class="btn btn-primary btn-lg" style="font-weight:300; margin-top:10px" href="#">View Badge Requests</a>
+            </span>
+            <span class="label-spacing">
+                <a id="issued-link" class="btn btn-primary btn-lg" style="font-weight:300; margin-top:10px" href="#">View All Issued Badges</a>
+            </span>
+                <button id="edit-notes" class="btn btn-bold-blue btn-lg btn-pop" style="font-weight:600; margin-top:10px">Update</button>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block javascripts-after %}
+
+    <script>
+    $(function() {
+        applicantData = JSON.parse('{{ applicant | safe | escapejs }}').data[0];
+        console.log(applicantData);
+        $('#requests-link').attr("href", "{% url 'applicant_view' 'applicantIDPlaceholder' %}?history=requests".replace('applicantIDPlaceholder', intToHashid(applicantData.applicant_id)));
+        $('#issued-link').attr("href", "{% url 'applicant_view' 'applicantIDPlaceholder' %}?history=issuance".replace('applicantIDPlaceholder', intToHashid(applicantData.applicant_id)));
+        $('#first_name').val(applicantData.first_name);
+
+        if (applicantData.middle_name == null || applicantData.middle_name == "") {
+            $('#middle-name-form').css("display", "none");
+            $('.page-title').text("Applicant Profile: " + applicantData.first_name + " " + applicantData.last_name);
+            $(document).attr("title", "Applicant Profile - " + applicantData.first_name + " " + applicantData.last_name);
+        }
+        else {
+            $('#middle_name').val(applicantData.middle_name);
+            $('.page-title').text("Applicant Profile: " + applicantData.first_name + " " +
+                    applicantData.middle_name + " " + applicantData.last_name);
+             $(document).attr("title", "Applicant Profile - " + applicantData.first_name + " " +
+                     applicantData.middle_name + " " + applicantData.last_name);
+        }
+
+        $('#last_name').val(applicantData.last_name);
+        $('#dob').val(applicantData.dob);
+
+
+        if (applicantData.badge_count.overrided_limited > 0) {
+            $('#ld-badges-issued').val(applicantData.badge_count.limited + " (" + applicantData.badge_count.overrided_limited + "*)");
+            $('#override-footnote').css("display", "block");
+        }
+        else
+            $('#ld-badges-issued').val(applicantData.badge_count.limited);
+        if (applicantData.badge_count.overrided_standard > 0) {$('#std-badges-issued').val(applicantData.badge_count.standard - applicantData.badge_count.overrided_standard + " (" + applicantData.badge_count.overrided_standard + "*)");
+        $('#override-footnote').css("display", "block");
+
+        }
+        else
+            $('#std-badges-issued').val(applicantData.badge_count.standard);
+
+        $('#totl-badges-issued').val(applicantData.badge_count.limited + applicantData.badge_count.standard);
+
+        $notes = $('#notes');
+        if (applicantData.notes_updated_by != null) {
+            $('#updated-by').text(applicantData.notes_updated_by);
+            $('#updated-time').text(applicantData.notes_timestamp);
+        }
+        else
+            $('#updated-by').parent().hide();
+        if (applicantData.notes == null)
+                applicantData.notes = "";
+        $notes.val(applicantData.notes);
+
+        $('#char-left').text(500 - $notes.val().length + " characters remaining");
+        $notes.on("keyup", function() {
+            $('#notes-error').css("display", "none");
+            var len = $(this).val().length;
+            $('#char-left').text(500 - len + " characters remaining");
+        });
+
+        $notes.on("blur", function() {
+            $notes.val($notes.val().replace(/[^\x00-\x7F]/g, "").trim());
+            var len = $(this).val().length;
+            $('#char-left').text(500 - len + " characters remaining");
+        });
+        $('#view-form').on("submit", function(e) {
+            if ($notes.val() == applicantData.notes) {
+                $('#notes-error').css("display", "block");
+                e.preventDefault();
+            }
+        });
+
+        var $noFly = $('#no_fly');
+        var $adjudication = $('#adjudications');
+        var $issuance = $('#issuance');
+
+
+        if (applicantData.status.nofly)
+            $noFly.addClass("applicant-status-pass").val("PASS");
+        else
+            $noFly.addClass("applicant-status-fail").val("FAIL");
+
+        if (applicantData.status.adjudication)
+            $adjudication.addClass("applicant-status-pass").val("PASS");
+        else
+            $adjudication.addClass("applicant-status-fail").val("FAIL");
+
+        if (applicantData.status.issuance_count < 4)
+            $issuance.addClass("applicant-status-pass").val("PASS");
+        else
+            $issuance.addClass("applicant-status-fail").val("FAIL");
+    });
+    </script>
+{% endblock %}
